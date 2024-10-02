@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: "PSU" ;
+    src: url(./font/psu-stidti-regular.ttf) format("truetype");
+}
+
+.main-font {
+    font-family: "PSU";
+}
