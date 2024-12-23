@@ -69,7 +69,7 @@ const Cartadmin = ({ onNewItemAdded }) => {
       <Headeradmin>
         <div className=" mt-9  flex justify-center items-center">
           <div className="w-full max-w-md bg-white shadow-lg rounded-md p-10">
-            <h1 className="text-3xl font-mono mb-5">เพิ่มรายการอุปกรณ์</h1>
+            <h1 className="text-2xl font-bold mb-4">เพิ่มรายการอุปกรณ์</h1>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label

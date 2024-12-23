@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { RiCheckboxBlankLine, RiCheckboxLine } from "react-icons/ri";
 import { IoClose } from "react-icons/io5";
 import Layout from "@/components/Layout";
-import { useRouter } from 'next/navigation'; // สำหรับเปลี่ยนหน้า
+import { useRouter } from 'next/navigation';
 
 const Cart = () => {
   const [items, setItems] = useState([]);
@@ -12,16 +12,14 @@ const Cart = () => {
   const [checkedCount, setCheckedCount] = useState(0);
   const [totalCheckedPrice, setTotalCheckedPrice] = useState(0);
   const [isSelectAllChecked, setIsSelectAllChecked] = useState(false);
-  const router = useRouter(); // ใช้เพื่อเปลี่ยนหน้าไปยัง EquipmentPage
+  const router = useRouter();
 
-  // โหลดข้อมูลจาก sessionStorage สำหรับ cartItems
   useEffect(() => {
     const cartItems = JSON.parse(sessionStorage.getItem('cartItems')) || [];
     setItems(cartItems);
     setCheckedItems(new Array(cartItems.length).fill(false));
   }, []);
 
-  // คำนวณราคารวมของอุปกรณ์ที่ถูกเลือก
   useEffect(() => {
     const total = items.reduce((sum, item, index) => {
       if (checkedItems[index]) {
@@ -47,10 +45,7 @@ const Cart = () => {
     const newCheckedItems = checkedItems.filter((_, i) => i !== index);
     setCheckedItems(newCheckedItems);
 
-    // อัปเดต sessionStorage ของ cartItems
     sessionStorage.setItem('cartItems', JSON.stringify(newItems));
-
-    // อัปเดต sessionStorage ของ borrowedItems โดยลบรายการที่ถูกลบจาก cartItems
     const borrowedItems = JSON.parse(sessionStorage.getItem('borrowedItems')) || [];
     const updatedBorrowedItems = borrowedItems.filter((borrowedItem) => {
       return newItems.some((item) => item.id === borrowedItem.id);
@@ -85,14 +80,12 @@ const Cart = () => {
     }
   };
 
-  // ฟังก์ชันยืมอุปกรณ์และบันทึกข้อมูลไปยัง Strapi API
   const handleBorrowItems = async () => {
-    const borrowedItems = items.filter((item, index) => checkedItems[index]); // เลือกเฉพาะอุปกรณ์ที่ติ๊กไว้
-    sessionStorage.setItem('borrowedItems', JSON.stringify(borrowedItems)); // เก็บข้อมูลใน sessionStorage
-    
-    // ทำการส่งข้อมูลไปยัง API ของ Strapi
+    const borrowedItems = items.filter((item, index) => checkedItems[index]);
+    sessionStorage.setItem('borrowedItems', JSON.stringify(borrowedItems));
+
     try {
-      const response = await fetch('/api/carts/1', { // ใช้ PUT กับ ID ของ cart ที่คุณต้องการอัพเดต (เปลี่ยน '1' เป็น ID ที่ต้องการ)
+      const response = await fetch('/api/carts/1', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -110,7 +103,7 @@ const Cart = () => {
       if (response.ok) {
         const result = await response.json();
         console.log("บันทึกข้อมูลสำเร็จ:", result);
-        router.push('/equipment'); // เปลี่ยนหน้าไปยัง EquipmentPage
+        router.push('/equipment');
       } else {
         console.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล:", response.statusText);
       }
@@ -132,7 +125,7 @@ const Cart = () => {
               <h1 className='text-sm font-sans-serif font-bold w-32 text-center'>รายการอุปกรณ์</h1>
               <h1 className='text-sm font-sans-serif font-bold w-20 text-center'>ราคาต่อชิ้น</h1>
               <h1 className='text-sm font-sans-serif font-bold w-10 text-center'>จำนวน</h1>
-              <h1 className='text-sm font-sans-serif font-bold w-14 text-center'>ราคารวม</h1>
+              <h1 className='text-sm font-sans-serif font-bold w-16 text-center'>ราคารวม</h1>
               <h1 className='text-sm font-sans-serif font-bold w-9 text-center'>ยกเลิก</h1>
             </div>
           </div>
@@ -161,7 +154,6 @@ const Cart = () => {
                           backgroundSize: 'cover',
                           backgroundPosition: 'center'
                         }}
-                        
                       ></div>
                       <div className='mt-9 flex-1 w-32 text-sm '>
                         <div className='text-black text-sm font-bold'>{item.attributes?.Label}</div>
@@ -185,7 +177,7 @@ const Cart = () => {
                       <IoClose className='text-red-600 h-7 w-8 cursor-pointer' onClick={() => handleRemoveItem(index)} />
                     </div>
                   </div>
-                  <div className="border-b border-black mx-8 mt-5"></div>
+                  {index < items.length - 1 && <div className="border-b border-black mx-8 mt-5"></div>}
                 </div>
               );
             })}

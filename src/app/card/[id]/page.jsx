@@ -18,7 +18,7 @@ const Card = ({ params }) => {
       // ดึงข้อมูลจาก API โดยใช้ id ที่ได้จาก URL
       const fetchData = async () => {
         try {
-          const response = await fetch(`http://172.19.224.1:1337/api/cartadmins/${id}?populate=*`);
+          const response = await fetch(`http://172.20.64.1:1337/api/cartadmins/${id}?populate=*`);
           const result = await response.json();
           setSelectedItem(result.data);
         } catch (error) {

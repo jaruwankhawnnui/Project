@@ -112,7 +112,7 @@ const CommentPage = () => {
 
             {/* Label Input Field */}
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2">Label</label>
+              <label className="block text-gray-700 text-sm font-bold mb-2">News-title</label>
               <input
                 type="text"
                 value={label}

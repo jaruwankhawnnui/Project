@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import axios from 'axios';
-import Layout from "@/components/Layout";
+import Headeradmin from "@/components/Headeradmin";
 
 const CreateCategory = ({ onNewCategoryAdded }) => {
   const [label, setLabel] = useState('');
@@ -42,7 +42,7 @@ const CreateCategory = ({ onNewCategoryAdded }) => {
 
   return (
     <div className='bg-gray-100 w-full flex flex-col min-h-screen'>
-    <Layout>
+    <Headeradmin>
       <div className="max-w-md mx-auto mt-5 bg-white shadow-md rounded-md p-6">
         <h1 className="text-2xl font-bold mb-6">Create Category</h1>
         <form onSubmit={handleSubmit}>
@@ -69,7 +69,7 @@ const CreateCategory = ({ onNewCategoryAdded }) => {
           </button>
         </form>
       </div>
-    </Layout>
+    </Headeradmin>
     </div>
   );
 };

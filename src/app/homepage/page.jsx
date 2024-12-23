@@ -12,7 +12,7 @@ const Home = () => {
 
   // Fetch data from API
   useEffect(() => {
-    fetch('http://172.19.224.1:1337/api/cartadmins?populate=*')
+    fetch('http://172.20.64.1:1337/api/cartadmins?populate=*')
       .then((response) => {
         if (!response.ok) {
           throw new Error('Network response was not ok ' + response.statusText);
@@ -79,7 +79,7 @@ const Home = () => {
       image: item.attributes?.image?.data?.id || null,  // Use ID instead of URL if image is a relation
     }).toString();
   
-    const url = `http://172.19.224.1:1337/api/cartadmins?${params}&populate=*`;
+    const url = `http://172.20.64.1:1337/api/cartadmins?${params}&populate=*`;
     console.log("URL to fetch:", url);
   
     try {

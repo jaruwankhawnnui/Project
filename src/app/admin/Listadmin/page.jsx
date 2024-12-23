@@ -46,7 +46,7 @@ const InventoryList = () => {
     <Headeradmin>
       <div className="p-8">
         <div className="flex  justify-between items-center  bg-white mb-4 mx-20 ">
-          <h1 className="mt-4 shadow-lg h-28 w-full text-3xl pl-10  font-mono ">รายการอุปกรณ์</h1>
+          <h1 className="mt-4 shadow-lg h-28 w-full text-3xl pl-10  font-bold   ">รายการอุปกรณ์</h1>
         </div>
         <button className="bg-blue-500 text-white py-2 px-4 mx-20 rounded hover:bg-blue-700">
           + Add New

@@ -1,126 +1,129 @@
 'use client';
 
-import { useState } from "react";
+import React, { useState } from "react";
+import axios from "axios";
 import Headeradmin from "@/components/Headeradmin";
-import axios from 'axios';  // นำเข้า axios
 
-export default function AddNews() {
+const AddContact = ({ onNewItemAdded }) => {
   const [formData, setFormData] = useState({
-    label: "",
-    detail: "",
-    image: "", // ใช้สำหรับเก็บ URL ของรูปภาพ
+    phone: "",
+    email: "",
+    website: "", // เปลี่ยนจากการอัปโหลดไฟล์เป็นการใส่ URL แทน
   });
-  const [message, setMessage] = useState(""); // สำหรับแสดงผลลัพธ์หลังการส่ง
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const contactData = {
+      phone: formData.phone,
+      email: formData.email,
+      website: formData.website,
+    };
+
     try {
-      // ส่งข้อมูลไปยัง API
       const response = await axios.put(
-        "http://172.19.224.1:1337/api/addwebnew",  // URL ของ API
-        formData,  // ส่งข้อมูลในรูปแบบ JSON
+        "http://172.19.224.1:1337/api/addcontacts/14", // URL ของ API สำหรับเพิ่มข้อมูล
+        {
+          data: contactData,
+        },
         {
           headers: {
-            "Content-Type": "application/json",  // ส่งข้อมูลในรูปแบบ JSON
+            "Content-Type": "application/json",
           },
         }
       );
+      console.log("Success:", response.data);
+      onNewItemAdded(); // ทำงานหลังจากเพิ่มข้อมูลสำเร็จ
 
-      if (response.status === 200 || response.status === 201) {
-        setMessage("ข่าวสารถูกเพิ่มเรียบร้อยแล้ว!");
-        // เคลียร์ข้อมูลในฟอร์มหลังจากส่งสำเร็จ
-        setFormData({
-          label: "",
-          detail: "",
-          image: "",
-        });
-      } else {
-        setMessage("เกิดข้อผิดพลาดในการเพิ่มข่าว");
-      }
+      // Reset form fields after successful submit
+      setFormData({
+        phone: "",
+        email: "",
+        website: "",
+      });
     } catch (error) {
-      setMessage("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้: " + error.message);
+      console.error("Error:", error.response?.data || error.message);
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: value,
-    }));
-  };
-
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="bg-gray-100 min-h-screen">
       <Headeradmin>
         <div className="mt-9 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-            <h1 className="text-2xl font-bold mb-4">เพิ่มข่าวสาร</h1>
-
+          <div className="w-full max-w-md bg-white shadow-lg rounded-md p-10">
+            <h1 className="text-2xl font-bold mb-4">แก้ไขข้อมูลการติดต่อ</h1>
             <form onSubmit={handleSubmit}>
-              {/* URL ของรูปภาพ */}
+              {/* ฟิลด์ phone */}
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Image URL
+                <label className="block text-gray-700 font-bold" htmlFor="phone">
+                  Phone
                 </label>
                 <input
                   type="text"
-                  name="image"
-                  placeholder="Image URL"
-                  value={formData.image}
+                  id="phone"
+                  name="phone"
+                  value={formData.phone}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  className="w-full p-2 border rounded-md"
+                  placeholder="ใส่เบอร์โทรศัพท์..."
                   required
                 />
               </div>
 
-              {/* Label */}
+              {/* ฟิลด์ email */}
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Label
+                <label className="block text-gray-700 font-bold" htmlFor="email">
+                  Email
                 </label>
                 <input
-                  type="text"
-                  name="label"
-                  placeholder="Label"
-                  value={formData.label}
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  className="w-full p-2 border rounded-md"
+                  placeholder="ใส่อีเมล..."
                   required
                 />
               </div>
 
-              {/* Detail */}
+              {/* ฟิลด์ website */}
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Detail
+                <label className="block text-gray-700 font-bold" htmlFor="website">
+                  Website
                 </label>
-                <textarea
-                  name="detail"
-                  placeholder="Detail"
-                  value={formData.detail}
+                <input
+                  type="url"
+                  id="website"
+                  name="website"
+                  value={formData.website}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  className="w-full p-2 border rounded-md"
+                  placeholder="ใส่ลิงก์เว็บไซต์..."
                   required
                 />
               </div>
 
-              {/* แสดงข้อความแจ้งเตือน */}
-              {message && <p className="text-green-500">{message}</p>}
-
-              <div className="flex justify-end">
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700"
-                >
-                  Create
-                </button>
-              </div>
+              <button
+                type="submit"
+                className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-700"
+              >
+                Confirm
+              </button>
             </form>
           </div>
         </div>
       </Headeradmin>
     </div>
   );
-}
+};
+
+export default AddContact;

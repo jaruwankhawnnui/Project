@@ -13,7 +13,7 @@ export default function Home() {
   useEffect(() => {
     const fetchWebnews = async () => {
       try {
-        const response = await axios.get('http://172.19.224.1:1337/api/webnews?populate=*');
+        const response = await axios.get('http://172.20.64.1:1337/api/webnews?populate=*');
         setWebnews(response.data.data); // Store the fetched data
       } catch (error) {
         setError("Error fetching webnews"); // Handle errors
