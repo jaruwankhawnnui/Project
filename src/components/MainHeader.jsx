@@ -36,6 +36,7 @@ const MainHeader = ({ session }) => {
       "Monitor",
       "Printer",
       "Scanner",
+      
       "Webcam",
       "Headphones",
     ];
