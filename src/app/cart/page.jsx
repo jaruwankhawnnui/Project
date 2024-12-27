@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { RiCheckboxBlankLine, RiCheckboxLine } from "react-icons/ri";
 import { IoClose } from "react-icons/io5";
 import Layout from "@/components/Layout";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const Cart = () => {
   const [items, setItems] = useState([]);
@@ -12,13 +13,44 @@ const Cart = () => {
   const [checkedCount, setCheckedCount] = useState(0);
   const [totalCheckedPrice, setTotalCheckedPrice] = useState(0);
   const [isSelectAllChecked, setIsSelectAllChecked] = useState(false);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { data: session } = useSession();
 
   useEffect(() => {
-    const cartItems = JSON.parse(sessionStorage.getItem('cartItems')) || [];
-    setItems(cartItems);
-    setCheckedItems(new Array(cartItems.length).fill(false));
-  }, []);
+    const fetchUserItems = async () => {
+      if (!session?.user?.email) {
+        console.error("User is not logged in");
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `http://172.20.160.1:1337/api/adds?filters[email][$eq]=${session.user.email}`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          const enrichedItems = data.data.map((item) => ({
+            id: item.id,
+            quantity: item.attributes.amount || 1, // Default quantity
+            attributes: item.attributes,
+          }));
+          setItems(enrichedItems);
+          setCheckedItems(new Array(enrichedItems.length).fill(false)); // Reset checkbox states
+        } else {
+          console.error("Failed to fetch items:", await response.text());
+        }
+      } catch (error) {
+        console.error("Error fetching items:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserItems();
+  }, [session?.user?.email]);
 
   useEffect(() => {
     const total = items.reduce((sum, item, index) => {
@@ -28,47 +60,26 @@ const Cart = () => {
       return sum;
     }, 0);
     setTotalCheckedPrice(total);
+    setCheckedCount(checkedItems.filter((item) => item).length);
   }, [checkedItems, items]);
 
   const handleCheckboxChange = (index) => {
     const newCheckedItems = [...checkedItems];
     newCheckedItems[index] = !newCheckedItems[index];
     setCheckedItems(newCheckedItems);
-
-    setCheckedCount(newCheckedItems.filter(item => item).length);
-    setIsSelectAllChecked(newCheckedItems.every(item => item));
-  };
-
-  const handleRemoveItem = (index) => {
-    const newItems = items.filter((_, i) => i !== index);
-    setItems(newItems);
-    const newCheckedItems = checkedItems.filter((_, i) => i !== index);
-    setCheckedItems(newCheckedItems);
-
-    sessionStorage.setItem('cartItems', JSON.stringify(newItems));
-    const borrowedItems = JSON.parse(sessionStorage.getItem('borrowedItems')) || [];
-    const updatedBorrowedItems = borrowedItems.filter((borrowedItem) => {
-      return newItems.some((item) => item.id === borrowedItem.id);
-    });
-    sessionStorage.setItem('borrowedItems', JSON.stringify(updatedBorrowedItems));
-
-    setCheckedCount(newCheckedItems.filter(item => item).length);
-    setIsSelectAllChecked(newCheckedItems.every(item => item));
+    setIsSelectAllChecked(newCheckedItems.every((item) => item));
   };
 
   const handleSelectAllChange = () => {
     const newCheckedState = !isSelectAllChecked;
     setIsSelectAllChecked(newCheckedState);
-    const newCheckedItems = checkedItems.map(() => newCheckedState);
-    setCheckedItems(newCheckedItems);
-    setCheckedCount(newCheckedItems.filter(item => item).length);
+    setCheckedItems(checkedItems.map(() => newCheckedState));
   };
 
   const increaseQuantity = (index) => {
     const newItems = [...items];
     newItems[index].quantity += 1;
     setItems(newItems);
-    sessionStorage.setItem('cartItems', JSON.stringify(newItems));
   };
 
   const decreaseQuantity = (index) => {
@@ -76,134 +87,130 @@ const Cart = () => {
     if (newItems[index].quantity > 1) {
       newItems[index].quantity -= 1;
       setItems(newItems);
-      sessionStorage.setItem('cartItems', JSON.stringify(newItems));
     }
   };
 
   const handleBorrowItems = async () => {
-    const borrowedItems = items.filter((item, index) => checkedItems[index]);
-    sessionStorage.setItem('borrowedItems', JSON.stringify(borrowedItems));
+    const borrowedItems = items.filter((_, index) => checkedItems[index]);
+    if (borrowedItems.length === 0) {
+      alert("กรุณาเลือกอุปกรณ์ที่ต้องการยืม");
+      return;
+    }
 
     try {
-      const response = await fetch('/api/carts/1', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          items: borrowedItems.map(item => ({
-            id: item.id,
-            quantity: item.quantity,
-            price: item.attributes?.Price,
-            label: item.attributes?.Label,
-          }))
-        })
-      });
+      for (const item of borrowedItems) {
+        const response = await fetch(`http://172.20.160.1:1337/api/adds/${item.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            data: {
+              label: item.attributes?.label || "Unknown Item",
+              amount: item.quantity,
+              user_login: session.user.email, // ใช้ email ผู้ใช้ที่ล็อกอิน
+            },
+          }),
+        });
 
-      if (response.ok) {
-        const result = await response.json();
-        console.log("บันทึกข้อมูลสำเร็จ:", result);
-        router.push('/equipment');
-      } else {
-        console.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล:", response.statusText);
+        if (!response.ok) {
+          console.error("Failed to borrow item:", await response.text());
+          alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+          return;
+        }
       }
+      alert("การยืมอุปกรณ์สำเร็จ");
+      router.push("/equipment");
     } catch (error) {
-      console.error("เกิดข้อผิดพลาด:", error);
+      console.error("Error borrowing items:", error);
+      alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
     }
   };
 
   return (
-    <div className='bg-gray-100 min-h-screen'>
+    <div className="bg-gray-100 min-h-screen">
       <Layout>
-        <div>
-          <div className='bg-white mx-40 mt-1 mr-40 shadow-lg'>
-            <div className='flex h-40'>
-              <h1 className='flex text-4xl mx-9 mt-5 font-medium-9'>รถเข็น</h1>
-            </div>
-            <div className='flex h-10 justify-around'>
-              <div className='w-11'></div>
-              <h1 className='text-sm font-sans-serif font-bold w-32 text-center'>รายการอุปกรณ์</h1>
-              <h1 className='text-sm font-sans-serif font-bold w-20 text-center'>ราคาต่อชิ้น</h1>
-              <h1 className='text-sm font-sans-serif font-bold w-10 text-center'>จำนวน</h1>
-              <h1 className='text-sm font-sans-serif font-bold w-16 text-center'>ราคารวม</h1>
-              <h1 className='text-sm font-sans-serif font-bold w-9 text-center'>ยกเลิก</h1>
-            </div>
-          </div>
-
-          <div className='bg-white mx-40 mt-6 shadow-lg flex flex-col'>
-            {items.map((item, index) => {
-              const totalPrice = item.attributes?.Price * item.quantity;
-              return (
-                <div key={index}>
-                  <div className='flex items-center justify-around'>
-                    <div className='mt-14 mx-1' onClick={() => handleCheckboxChange(index)}>
-                      {checkedItems[index] ? (
-                        <RiCheckboxLine className='w-7 h-9 mx-2 text-green-500' />
-                      ) : (
-                        <RiCheckboxBlankLine className='w-7 h-9 mx-2' />
-                      )}
-                    </div>
-
-                    <div className='flex flex-col items-center'>
-                      <div
-                        className='bg-gray-300 rounded-lg p-14 w-32 h-32 mt-6 mr-2'
-                        style={{
-                          backgroundImage: item.attributes?.image?.data?.attributes?.url
-                            ? `url(${item.attributes?.image?.data?.attributes?.url})`
-                            : 'none',
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center'
+        <div className="container mx-auto">
+          <h1 className="text-4xl font-bold my-6">รถเข็นของฉัน</h1>
+          {loading ? (
+            <div className="text-center py-10">กำลังโหลดข้อมูล...</div>
+          ) : items.length === 0 ? (
+            <div className="text-center py-10">ไม่มีอุปกรณ์ในประวัติการยืม</div>
+          ) : (
+            <div>
+              <div className="shadow-lg bg-white p-4 rounded-lg">
+                {items.map((item, index) => {
+                  const totalPrice = item.attributes?.Price * item.quantity;
+                  return (
+                    <div key={index} className="flex items-center justify-between mb-4">
+                      <div onClick={() => handleCheckboxChange(index)}>
+                        {checkedItems[index] ? (
+                          <RiCheckboxLine className="w-6 h-6 text-green-500 cursor-pointer" />
+                        ) : (
+                          <RiCheckboxBlankLine className="w-6 h-6 cursor-pointer" />
+                        )}
+                      </div>
+                      <div className="flex items-center">
+                        <img
+                          src={item.attributes?.image?.data?.attributes?.url || "/placeholder.png"}
+                          alt={item.attributes?.label}
+                          className="w-20 h-20 rounded-lg mr-4"
+                        />
+                        <div>
+                          <h2 className="text-lg font-bold">{item.attributes?.label}</h2>
+                          <p className="text-gray-500">{item.attributes?.Price} ฿</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <button
+                          className="bg-gray-300 px-2 py-1 rounded-l"
+                          onClick={() => decreaseQuantity(index)}
+                        >
+                          -
+                        </button>
+                        <span className="px-4">{item.quantity}</span>
+                        <button
+                          className="bg-gray-300 px-2 py-1 rounded-r"
+                          onClick={() => increaseQuantity(index)}
+                        >
+                          +
+                        </button>
+                      </div>
+                      <div>{totalPrice} ฿</div>
+                      <IoClose
+                        className="text-red-500 cursor-pointer"
+                        onClick={() => {
+                          const newItems = items.filter((_, i) => i !== index);
+                          setItems(newItems);
+                          setCheckedItems(checkedItems.filter((_, i) => i !== index));
                         }}
-                      ></div>
-                      <div className='mt-9 flex-1 w-32 text-sm '>
-                        <div className='text-black text-sm font-bold'>{item.attributes?.Label}</div>
-                      </div>
+                      />
                     </div>
-
-                    <div className='flex flex-col items-center mt-9 w-20 '>
-                      <div className='text-black text-l '>{item.attributes?.Price} ฿</div>
-                    </div>
-                    <div className='flex flex-col items-center mt-9 w-10'>
-                      <div className='flex items-center'>
-                        <button onClick={() => decreaseQuantity(index)} className='px-3 py-1 bg-gray-300 rounded-l'>-</button>
-                        <span className='px-4 py-1 bg-white border-t border-b'>{item.quantity}</span>
-                        <button onClick={() => increaseQuantity(index)} className='px-3 py-1 bg-gray-300 rounded-r'>+</button>
-                      </div>
-                    </div>
-                    <div className='flex flex-col items-center mt-9 w-14'>
-                      <div className='text-black text-l '>{totalPrice} ฿</div>
-                    </div>
-                    <div className='flex justify-center mt-9 w-9'>
-                      <IoClose className='text-red-600 h-7 w-8 cursor-pointer' onClick={() => handleRemoveItem(index)} />
-                    </div>
-                  </div>
-                  {index < items.length - 1 && <div className="border-b border-black mx-8 mt-5"></div>}
+                  );
+                })}
+              </div>
+              <div className="flex justify-between items-center bg-white p-4 rounded-lg mt-4 shadow-lg">
+                <div onClick={handleSelectAllChange} className="flex items-center cursor-pointer">
+                  {isSelectAllChecked ? (
+                    <RiCheckboxLine className="w-6 h-6 text-green-500" />
+                  ) : (
+                    <RiCheckboxBlankLine className="w-6 h-6" />
+                  )}
+                  <span className="ml-2">เลือกทั้งหมด</span>
                 </div>
-              );
-            })}
-          </div>
-
-          <div className='bg-white mx-40 mt-5 mr-40 shadow-lg h-20 flex justify-between items-center'>
-            <div className='flex items-center ml-4' onClick={handleSelectAllChange}>
-              {isSelectAllChecked ? (
-                <RiCheckboxLine className='w-7 h-9 mx-2 text-green-500' />
-              ) : (
-                <RiCheckboxBlankLine className='w-7 h-9 mx-14' />
-              )}
-              <span className='text-l font-serif '>เลือกทั้งหมด</span>
+                <div>
+                  <span>รวม: {checkedCount} ชิ้น</span>
+                  <span className="ml-4">ราคารวมทั้งหมด: {totalCheckedPrice} ฿</span>
+                  <button
+                    className="bg-blue-500 text-white px-4 py-2 ml-4 rounded-lg"
+                    onClick={handleBorrowItems}
+                  >
+                    ยืมอุปกรณ์
+                  </button>
+                </div>
+              </div>
             </div>
-
-            <div className='flex justify-end'>
-              <span className='text-l font-serif flex items-center mx-8 mt-8'>รวม: {checkedCount} ชิ้น</span>
-              <span className='text-l font-serif flex items-center mx-8 mt-8'>ราคารวมทั้งหมด: {totalCheckedPrice} ฿</span>
-              <button 
-                className='shadow-lg shadow-indigo-500/40 bg-blue-200 h-10 w-40 mt-7 mr-5'
-                onClick={handleBorrowItems}
-              >
-                ยืมอุปกรณ์
-              </button>
-            </div>
-          </div>
+          )}
         </div>
       </Layout>
     </div>

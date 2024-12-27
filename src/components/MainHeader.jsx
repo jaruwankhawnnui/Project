@@ -36,7 +36,7 @@ const MainHeader = ({ session }) => {
       "Monitor",
       "Printer",
       "Scanner",
-      
+
       "Webcam",
       "Headphones",
     ];
@@ -78,16 +78,25 @@ const MainHeader = ({ session }) => {
           <FaBell className='cursor-pointer h-6 w-7 text-gray-400' />
         </div>
         <FaBars className='cursor-pointer h-6 w-7 text-gray-400 mb:hidden' onClick={toggleMenu} />
-        <div className="relative">
-          <Image
-            src={session?.user?.image}
-            alt={session?.user?.name}
-            width={50}
-            height={50}
-            className="rounded-full cursor-pointer"
-            onClick={toggleMenu}
-          />
+        <div>
+          {session ? (
+            <Image
+              src={session.user.image}
+              alt={session.user.name}
+              width={50}
+              height={50}
+              className="rounded-full cursor-pointer"
+              onClick={toggleMenu}
+            />
+          ) : (
+            <Link href="/">
+              <button className="bg-red-500 text-white px-4 py-2 rounded-lg">
+                Logout
+              </button>
+            </Link>
+          )}
         </div>
+
       </div>
       {menuVisible && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={toggleMenu}></div>
@@ -118,7 +127,7 @@ const MainHeader = ({ session }) => {
             <FaNewspaper className='mr-2' />
             <Link href="/webnew">ข่าวสารเว็บไซต์</Link>
           </li>
-          
+
           <li className='flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4'>
             <GrContactInfo className='mr-2' />
             <Link href="/contact">ข้อมูลการติดต่อ</Link>
