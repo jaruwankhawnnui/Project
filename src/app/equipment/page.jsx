@@ -2,81 +2,111 @@
 
 import React, { useEffect, useState } from 'react';
 import Layout from "@/components/Layout";
+import { IoClose } from "react-icons/io5";
 import { useRouter } from 'next/navigation';
 
 const EquipmentPage = () => {
   const [borrowedItems, setBorrowedItems] = useState([]);
   const router = useRouter();
 
-  // Fetch borrowed items from sessionStorage
+  // Fetch borrowed items from API
   useEffect(() => {
-    const items = JSON.parse(sessionStorage.getItem('borrowedItems')) || [];
-    setBorrowedItems(items);
+    const fetchBorrowedItems = async () => {
+      try {
+        const response = await fetch(`http://172.25.176.1:1337/api/addcart-anddeletes?populate=image`);
+        if (response.ok) {
+          const data = await response.json();
+          const items = data.data.map(item => ({
+            id: item.id,
+            quantity: item.attributes.amount || 1,
+            attributes: item.attributes,
+          }));
+          setBorrowedItems(items);
+        } else {
+          console.error("Failed to fetch items:", await response.text());
+        }
+      } catch (error) {
+        console.error("Error fetching borrowed items:", error);
+      }
+    };
+
+    fetchBorrowedItems();
   }, []);
 
-  // Navigate to borrowing form and store the current date
+  // Navigate to borrowing form
   const handleGoToBorrowForm = () => {
-    const currentDate = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
-    sessionStorage.setItem('borrowDate', currentDate); // Store the date in sessionStorage
-    router.push('/borrow-form'); // Navigate to the borrow form page
+    const currentDate = new Date().toISOString().split('T')[0];
+    sessionStorage.setItem('borrowDate', currentDate);
+    router.push('/borrow-form');
+  };
+
+  // Handle delete item
+  const handleDeleteItem = async (id) => {
+    try {
+      const response = await fetch(`http://172.25.176.1:1337/api/addcart-anddeletes/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setBorrowedItems(borrowedItems.filter(item => item.id !== id));
+        alert("ลบอุปกรณ์สำเร็จ");
+      } else {
+        console.error("Error deleting item:", await response.text());
+        alert("เกิดข้อผิดพลาดในการลบอุปกรณ์");
+      }
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      alert("เกิดข้อผิดพลาดในการลบอุปกรณ์");
+    }
   };
 
   return (
     <div className='bg-gray-100 min-h-screen'>
       <Layout>
-        <div className='bg-white mx-40 mr-40 shadow-lg'>
-          <div className='flex h-40 '>
-            <h1 className='text-4xl font-medium mx-9 mt-4'>ยืมอุปกรณ์</h1>
-          </div>
-          <div className='flex h-10 justify-around'>
-            <h1 className='text-sm font-sans-serif font-bold w-26 text-center'>รายการอุปกรณ์</h1>
-            <h1 className='text-sm font-sans-serif font-bold w-20 pl-1 text-center'>ราคาต่อชิ้น</h1>
-            <h1 className='text-sm font-sans-serif font-bold w-10 pl-20 mr-30 text-center'>จำนวน</h1>
-            <h1 className='text-sm font-sans-serif font-bold w-15 pl-4 text-center'>ราคารวม</h1>
-          </div>
-        </div>
+        <div className='container mx-auto mt-10'>
+          <h1 className='text-4xl font-bold text-center mb-10'>ยืมอุปกรณ์</h1>
+          <div className='bg-white shadow-md rounded-lg p-6'>
+            {/* Header Row */}
+            <div className='grid grid-cols-5 text-gray-700 font-semibold border-b pb-4 mb-4 text-center'>
+              <div>รายการอุปกรณ์</div>
+              <div>ราคาต่อชิ้น</div>
+              <div>จำนวน</div>
+              <div>ราคารวม</div>
+              <div>ลบ</div>
+            </div>
 
-        <div className='bg-white mx-40 mt-5 mr-40 shadow-lg'>
-          {borrowedItems.length === 0 ? (
-            <div className="p-8 mx-8">ไม่มีอุปกรณ์ที่ยืม</div>
-          ) : (
-            borrowedItems.map((item, index) => (
-              <div key={index}>
-                <div className='flex items-center p-8 mx-8'>
-                  <img
-                    src={item.attributes?.image?.data?.attributes?.url || "/default.jpg"}
-                    alt={item.attributes?.Label}
-                    className='w-20 h-20 object-cover'
-                  />
-                  <div className='flex-1 ml-4'>
-                    <h2 className='text-black text-l font-bold'>{item.attributes?.Label}</h2>
-                    <p className='text-gray-500 text-xs'>{item.attributes?.Category}</p>
+            {/* Borrowed Items */}
+            {borrowedItems.length === 0 ? (
+              <div className='text-center text-gray-500 py-8'>ไม่มีอุปกรณ์ที่ยืม</div>
+            ) : (
+              borrowedItems.map((item, index) => (
+                <div
+                  key={index}
+                  className='grid grid-cols-5 gap-4 items-center py-4 border-b text-center'
+                >
+                  <div>
+                    <h2 className='text-lg font-bold text-gray-800'>{item.attributes?.label}</h2>
+                    <p className='text-sm text-gray-500'>{item.attributes?.category || "N/A"}</p>
                   </div>
-
-                  <div className='flex-1 flex-col items-center mx-40 mr-30 pl-10 mt-2'>
-                    <p className='text-black text-sm'>{item.attributes?.Price} ฿</p>
-                  </div>
-                  <div className='flex-1 flex-col items-center mx-32 mt-2 w-10'>
-                    <p className='text-black text-sm'>{item.quantity}</p>
-                  </div>
-                  <div className='flex-1 flex-col items-center mx-30 mt-2 w-14'>
-                    <p className='text-black text-sm'>{item.attributes?.Price * item.quantity} ฿</p>
+                  <div>{item.attributes?.Price} ฿</div>
+                  <div>{item.quantity}</div>
+                  <div>{item.attributes?.Price * item.quantity} ฿</div>
+                  <div>
+                    <IoClose
+                      className='text-red-500 text-xl cursor-pointer mx-32 hover:text-red-700'
+                      onClick={() => handleDeleteItem(item.id)}
+                    />
                   </div>
                 </div>
+              ))
+            )}
+          </div>
 
-                {index < borrowedItems.length - 1 && (
-                  <div className="border-b border-black mx-8"></div>
-                )}
-              </div>
-            ))
-          )}
-        </div>
-
-        <div className='bg-white mx-40 mt-5 mr-40 shadow-lg h-20'>
-          <div className='flex justify-end'>
+          {/* Button */}
+          <div className='flex justify-end mt-6'>
             <button
-              className="shadow-lg rounded-lg shadow-indigo-500/40 bg-blue-200 h-full w-40 mt-5 mr-5"
-              onClick={handleGoToBorrowForm} // Capture the current date and navigate to borrow form
+              className='bg-blue-500 text-white py-2 px-6 rounded-lg shadow-md hover:bg-blue-600 transition duration-200'
+              onClick={handleGoToBorrowForm}
             >
               พิมพ์แบบฟอร์มยืมอุปกรณ์
             </button>

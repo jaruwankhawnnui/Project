@@ -47,7 +47,7 @@ const rentailinfo = async () => {
 
   return (
     <div className="bg-gray-100">
-      <Layout session={session}>
+      <Layout>
         <div className=''>
           <div className='bg-white mx-40 mt-1 mr-40 shadow-lg'>
             <div className='flex h-40'>

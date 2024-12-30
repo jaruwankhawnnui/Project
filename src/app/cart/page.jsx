@@ -27,18 +27,18 @@ const Cart = () => {
       setLoading(true);
       try {
         const response = await fetch(
-          `http://172.20.160.1:1337/api/adds?filters[email][$eq]=${session.user.email}`
+          `http://172.25.176.1:1337/api/adds?filters[email][$eq]=${session.user.email}&populate=image`
         );
 
         if (response.ok) {
           const data = await response.json();
           const enrichedItems = data.data.map((item) => ({
             id: item.id,
-            quantity: item.attributes.amount || 1, // Default quantity
+            quantity: item.attributes.amount || 1,
             attributes: item.attributes,
           }));
           setItems(enrichedItems);
-          setCheckedItems(new Array(enrichedItems.length).fill(false)); // Reset checkbox states
+          setCheckedItems(new Array(enrichedItems.length).fill(false));
         } else {
           console.error("Failed to fetch items:", await response.text());
         }
@@ -90,6 +90,30 @@ const Cart = () => {
     }
   };
 
+  const deleteItem = async (id, index) => {
+    try {
+      const response = await fetch(`http://172.25.176.1:1337/api/adds/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        console.log("Deleted item successfully from Strapi");
+        // Remove item from local state
+        const updatedItems = items.filter((_, i) => i !== index);
+        setItems(updatedItems);
+        setCheckedItems(checkedItems.filter((_, i) => i !== index));
+        alert("ลบอุปกรณ์สำเร็จ");
+      } else {
+        const errorText = await response.text();
+        console.error("Error deleting item from Strapi:", errorText);
+        alert(`เกิดข้อผิดพลาดในการลบข้อมูล: ${errorText}`);
+      }
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      alert("เกิดข้อผิดพลาดในการลบข้อมูล");
+    }
+  };
+
   const handleBorrowItems = async () => {
     const borrowedItems = items.filter((_, index) => checkedItems[index]);
     if (borrowedItems.length === 0) {
@@ -99,30 +123,36 @@ const Cart = () => {
 
     try {
       for (const item of borrowedItems) {
-        const response = await fetch(`http://172.20.160.1:1337/api/adds/${item.id}`, {
-          method: "PUT",
+        console.log("Sending item to API:", item);
+
+        const response = await fetch(`http://172.25.176.1:1337/api/addcart-anddeletes`, {
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
             data: {
+              name: session.user.name || "Unknown User", 
               label: item.attributes?.label || "Unknown Item",
-              amount: item.quantity,
-              user_login: session.user.email, // ใช้ email ผู้ใช้ที่ล็อกอิน
+              email: session.user.email, 
+              amount: item.quantity, 
+              Price: item.attributes?.Price,
             },
           }),
         });
 
         if (!response.ok) {
-          console.error("Failed to borrow item:", await response.text());
-          alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+          const errorText = await response.text();
+          console.error("API Error Response:", errorText);
+          alert(`เกิดข้อผิดพลาดในการบันทึกข้อมูล: ${errorText}`);
           return;
         }
       }
+
       alert("การยืมอุปกรณ์สำเร็จ");
-      router.push("/equipment");
+      router.push("/equipment"); 
     } catch (error) {
-      console.error("Error borrowing items:", error);
+      console.error("Error saving items:", error);
       alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
     }
   };
@@ -142,48 +172,44 @@ const Cart = () => {
                 {items.map((item, index) => {
                   const totalPrice = item.attributes?.Price * item.quantity;
                   return (
-                    <div key={index} className="flex items-center justify-between mb-4">
-                      <div onClick={() => handleCheckboxChange(index)}>
+                    <div
+                      key={index}
+                      className="flex items-center justify-between py-4 border-b border-gray-200"
+                    >
+                      <div onClick={() => handleCheckboxChange(index)} className="cursor-pointer">
                         {checkedItems[index] ? (
-                          <RiCheckboxLine className="w-6 h-6 text-green-500 cursor-pointer" />
+                          <RiCheckboxLine className="w-6 h-6 text-green-500" />
                         ) : (
-                          <RiCheckboxBlankLine className="w-6 h-6 cursor-pointer" />
+                          <RiCheckboxBlankLine className="w-6 h-6" />
                         )}
                       </div>
-                      <div className="flex items-center">
-                        <img
-                          src={item.attributes?.image?.data?.attributes?.url || "/placeholder.png"}
-                          alt={item.attributes?.label}
-                          className="w-20 h-20 rounded-lg mr-4"
-                        />
+                      <div className="flex items-center gap-6 flex-1">
                         <div>
-                          <h2 className="text-lg font-bold">{item.attributes?.label}</h2>
-                          <p className="text-gray-500">{item.attributes?.Price} ฿</p>
+                          <h2 className="text-lg font-bold px-6 text-gray-800">
+                            {item.attributes?.label || "Unknown Item"}
+                          </h2>
+                          <p className="text-sm px-6 text-gray-500">{item.attributes?.Price || 0} ฿</p>
                         </div>
                       </div>
-                      <div className="flex items-center">
+                      <div className="flex items-center gap-1 px-6">
                         <button
-                          className="bg-gray-300 px-2 py-1 rounded-l"
+                          className="bg-gray-300 hover:bg-gray-400 px-2 py-1 rounded-l text-sm"
                           onClick={() => decreaseQuantity(index)}
                         >
                           -
                         </button>
                         <span className="px-4">{item.quantity}</span>
                         <button
-                          className="bg-gray-300 px-2 py-1 rounded-r"
+                          className="bg-gray-300 hover:bg-gray-400 px-2 py-1 rounded-r text-sm"
                           onClick={() => increaseQuantity(index)}
                         >
                           +
                         </button>
                       </div>
-                      <div>{totalPrice} ฿</div>
+                      <div className="text-gray-800 text-sm px-8">{totalPrice} ฿</div>
                       <IoClose
-                        className="text-red-500 cursor-pointer"
-                        onClick={() => {
-                          const newItems = items.filter((_, i) => i !== index);
-                          setItems(newItems);
-                          setCheckedItems(checkedItems.filter((_, i) => i !== index));
-                        }}
+                        className="text-red-500 cursor-pointer hover:text-red-600"
+                        onClick={() => deleteItem(item.id, index)}
                       />
                     </div>
                   );
@@ -196,13 +222,13 @@ const Cart = () => {
                   ) : (
                     <RiCheckboxBlankLine className="w-6 h-6" />
                   )}
-                  <span className="ml-2">เลือกทั้งหมด</span>
+                  <span className="ml-2 text-gray-800 font-medium">เลือกทั้งหมด</span>
                 </div>
-                <div>
-                  <span>รวม: {checkedCount} ชิ้น</span>
-                  <span className="ml-4">ราคารวมทั้งหมด: {totalCheckedPrice} ฿</span>
+                <div className="flex items-center gap-6">
+                  <span className="text-gray-800 font-medium">รวม: {checkedCount} ชิ้น</span>
+                  <span className="text-gray-800 font-bold">ราคารวมทั้งหมด: {totalCheckedPrice} ฿</span>
                   <button
-                    className="bg-blue-500 text-white px-4 py-2 ml-4 rounded-lg"
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
                     onClick={handleBorrowItems}
                   >
                     ยืมอุปกรณ์

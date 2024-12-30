@@ -49,7 +49,7 @@ const Cartadmin = ({ onNewItemAdded }) => {
 
     try {
       const response = await axios.post(
-        "http://172.21.0.1:1337/api/cartadmins",
+        "http://172.25.176.1:1337/api/cartadmins",
         data,
         {
           headers: {
