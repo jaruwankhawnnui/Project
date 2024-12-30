@@ -98,7 +98,6 @@ const Cart = () => {
 
       if (response.ok) {
         console.log("Deleted item successfully from Strapi");
-        // Remove item from local state
         const updatedItems = items.filter((_, i) => i !== index);
         setItems(updatedItems);
         setCheckedItems(checkedItems.filter((_, i) => i !== index));
@@ -125,18 +124,19 @@ const Cart = () => {
       for (const item of borrowedItems) {
         console.log("Sending item to API:", item);
 
-        const response = await fetch(`http://172.25.176.1:1337/api/addcart-anddeletes`, {
+        const response = await fetch(`http://172.25.176.1:1337/api/equipment`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
             data: {
-              name: session.user.name || "Unknown User", 
-              label: item.attributes?.label || "Unknown Item",
-              email: session.user.email, 
-              amount: item.quantity, 
-              Price: item.attributes?.Price,
+              name: session.user.name || "Unknown User", // User name
+              email: session.user.email, // User email
+              label: item.attributes?.label || "Unknown Item", // Equipment name
+              amount: item.quantity, // Quantity
+              Price: item.attributes?.Price, // Price per unit
+              totalPrice: item.attributes?.Price * item.quantity, // Total price
             },
           }),
         });

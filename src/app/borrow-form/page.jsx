@@ -1,28 +1,38 @@
-'use client';
+"use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
+import { useSession } from "next-auth/react";
 
 export default function BorrowForm() {
-  const formRef = useRef(); // Ref for the form content
+  const formRef = useRef();
+  const { data: session } = useSession();
+  const [borrowedItems, setBorrowedItems] = useState([]);
+  const [currentDate, setCurrentDate] = useState("");
 
-  // Function to generate PDF
+  useEffect(() => {
+    // ดึงข้อมูลจาก sessionStorage
+    const items = JSON.parse(sessionStorage.getItem("borrowedEquipment")) || [];
+    setBorrowedItems(items);
+
+    // ตั้งค่าวันที่ปัจจุบัน
+    const today = new Date();
+    const formattedDate = today.toISOString().split("T")[0]; // รูปแบบ YYYY-MM-DD
+    setCurrentDate(formattedDate);
+  }, []);
+
   const handleDownloadPDF = async () => {
     const formElement = formRef.current;
-
-    // Use html2canvas to capture the form
     const canvas = await html2canvas(formElement);
     const imgData = canvas.toDataURL("image/png");
-
-    // Create a jsPDF instance
     const pdf = new jsPDF("p", "mm", "a4");
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
     pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-    pdf.save("borrow-form.pdf"); // Save as "borrow-form.pdf"
+    pdf.save("borrow-form.pdf");
   };
 
   return (
@@ -31,50 +41,46 @@ export default function BorrowForm() {
         <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
           <div
             className="max-w-4xl w-full bg-white p-8 rounded-lg shadow-md"
-            ref={formRef} // Attach the ref to this element
+            ref={formRef}
           >
             <h1 className="text-2xl font-bold text-center mb-8">
               แบบฟอร์มการขอยืมวัสดุ/อุปกรณ์
             </h1>
-            <p className="text-center mb-4">
-              ภาควิชาวิศวกรรมคอมพิวเตอร์ คณะวิศวกรรมศาสตร์ มหาวิทยาลัยสงขลานครินทร์
-            </p>
-
-            {/* Form Content */}
             <form className="space-y-6">
-              {/* Date and Personal Info */}
+              {/* วันที่ */} 
               <div>
                 <label className="block text-sm font-medium">วันที่</label>
                 <input
                   type="date"
-                  className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                  value={currentDate}
+                  readOnly
+                  className="w-full mt-1 p-2 border border-gray-300 rounded-md bg-gray-100"
                 />
               </div>
+
+              {/* ข้อมูลผู้ยืม */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium">ชื่อ-นามสกุล</label>
                   <input
                     type="text"
-                    className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    value={session?.user?.name || ""}
+                    readOnly
+                    className="w-full mt-1 p-2 border border-gray-300 rounded-md bg-gray-100"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium">รหัสนักศึกษา</label>
+                  <label className="block text-sm font-medium">อีเมล</label>
                   <input
                     type="text"
-                    className="w-full mt-1 p-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium">ชั้นปี</label>
-                  <input
-                    type="text"
-                    className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    value={session?.user?.email || ""}
+                    readOnly
+                    className="w-full mt-1 p-2 border border-gray-300 rounded-md bg-gray-100"
                   />
                 </div>
               </div>
 
-              {/* Equipment List */}
+              {/* รายการอุปกรณ์ */}
               <div>
                 <p className="text-sm font-medium mb-2">
                   มีความประสงค์จะขอยืมวัสดุ/อุปกรณ์ ดังรายการต่อไปนี้:
@@ -85,32 +91,17 @@ export default function BorrowForm() {
                       <th className="border border-gray-300 p-2">ลำดับ</th>
                       <th className="border border-gray-300 p-2">รายการ</th>
                       <th className="border border-gray-300 p-2">จำนวน</th>
-                      <th className="border border-gray-300 p-2">อื่น ๆ</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {[...Array(5)].map((_, i) => (
-                      <tr key={i}>
+                    {borrowedItems.map((item, index) => (
+                      <tr key={index}>
+                        <td className="border border-gray-300 p-2 text-center">{index + 1}</td>
                         <td className="border border-gray-300 p-2 text-center">
-                          {i + 1}
+                          {item.attributes?.label}
                         </td>
-                        <td className="border border-gray-300 p-2">
-                          <input
-                            type="text"
-                            className="w-full border-none focus:outline-none"
-                          />
-                        </td>
-                        <td className="border border-gray-300 p-2">
-                          <input
-                            type="number"
-                            className="w-full border-none focus:outline-none"
-                          />
-                        </td>
-                        <td className="border border-gray-300 p-2">
-                          <input
-                            type="text"
-                            className="w-full border-none focus:outline-none"
-                          />
+                        <td className="border border-gray-300 p-2 text-center">
+                          {item.attributes?.amount}
                         </td>
                       </tr>
                     ))}
@@ -118,7 +109,7 @@ export default function BorrowForm() {
                 </table>
               </div>
 
-              {/* Purpose Section */}
+              {/* วัตถุประสงค์การใช้งาน */}
               <div>
                 <label className="block text-sm font-medium">
                   วัตถุประสงค์ของการใช้งานเพื่อ
@@ -128,8 +119,6 @@ export default function BorrowForm() {
                   className="w-full mt-1 p-2 border border-gray-300 rounded-md"
                 ></textarea>
               </div>
-
-              {/* Signatures */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm font-medium">ลงชื่อผู้ยืม:</p>
@@ -167,7 +156,7 @@ export default function BorrowForm() {
                   />
                   <p className="mt-2 text-sm">วันที่:</p>
                   <input
-                    type="date"
+                   
                     className="w-full mt-1 p-2 border border-gray-300 rounded-md"
                   />
                 </div>
@@ -179,14 +168,14 @@ export default function BorrowForm() {
                   />
                   <p className="mt-2 text-sm">วันที่:</p>
                   <input
-                    type="date"
+                   
                     className="w-full mt-1 p-2 border border-gray-300 rounded-md"
                   />
                 </div>
-              </div>
+                </div>
             </form>
 
-            {/* Download Button */}
+            {/* ปุ่มดาวน์โหลด PDF */}
             <div className="mt-6 flex justify-end">
               <button
                 className="bg-green-500 text-white px-6 py-2 rounded-md shadow-md hover:bg-green-600"

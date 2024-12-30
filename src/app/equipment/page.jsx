@@ -1,54 +1,64 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import { IoClose } from "react-icons/io5";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const EquipmentPage = () => {
-  const [borrowedItems, setBorrowedItems] = useState([]);
+  const [equipmentItems, setEquipmentItems] = useState([]);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const { data: session } = useSession();
   const router = useRouter();
 
-  // Fetch borrowed items from API
+  // Fetch equipment items from API
   useEffect(() => {
-    const fetchBorrowedItems = async () => {
+    const fetchEquipmentItems = async () => {
       try {
-        const response = await fetch(`http://172.25.176.1:1337/api/addcart-anddeletes?populate=image`);
+        const response = await fetch(`http://172.25.176.1:1337/api/equipment?populate=*`);
         if (response.ok) {
           const data = await response.json();
-          const items = data.data.map(item => ({
+          const items = data.data.map((item) => ({
             id: item.id,
-            quantity: item.attributes.amount || 1,
             attributes: item.attributes,
           }));
-          setBorrowedItems(items);
+          setEquipmentItems(items);
         } else {
           console.error("Failed to fetch items:", await response.text());
         }
       } catch (error) {
-        console.error("Error fetching borrowed items:", error);
+        console.error("Error fetching equipment items:", error);
       }
     };
 
-    fetchBorrowedItems();
+    fetchEquipmentItems();
   }, []);
 
-  // Navigate to borrowing form
+  // Calculate total price whenever equipmentItems changes
+  useEffect(() => {
+    const total = equipmentItems.reduce((sum, item) => {
+      return sum + (item.attributes?.Price * item.attributes?.amount || 0);
+    }, 0);
+    setTotalPrice(total);
+  }, [equipmentItems]);
+
   const handleGoToBorrowForm = () => {
-    const currentDate = new Date().toISOString().split('T')[0];
-    sessionStorage.setItem('borrowDate', currentDate);
-    router.push('/borrow-form');
+    // จัดเก็บข้อมูลอุปกรณ์ที่เลือกไว้ใน sessionStorage
+    sessionStorage.setItem("borrowedEquipment", JSON.stringify(equipmentItems));
+    router.push("/borrow-form");
   };
+  
 
   // Handle delete item
   const handleDeleteItem = async (id) => {
     try {
-      const response = await fetch(`http://172.25.176.1:1337/api/addcart-anddeletes/${id}`, {
+      const response = await fetch(`http://172.25.176.1:1337/api/equipment/${id}`, {
         method: "DELETE",
       });
 
       if (response.ok) {
-        setBorrowedItems(borrowedItems.filter(item => item.id !== id));
+        setEquipmentItems(equipmentItems.filter((item) => item.id !== id));
         alert("ลบอุปกรณ์สำเร็จ");
       } else {
         console.error("Error deleting item:", await response.text());
@@ -61,51 +71,54 @@ const EquipmentPage = () => {
   };
 
   return (
-    <div className='bg-gray-100 min-h-screen'>
+    <div className="bg-gray-100 min-h-screen">
       <Layout>
-        <div className='container mx-auto mt-10'>
-          <h1 className='text-4xl font-bold text-center mb-10'>ยืมอุปกรณ์</h1>
-          <div className='bg-white shadow-md rounded-lg p-6'>
+        <div className="container mx-auto mt-10">
+          <h1 className="text-4xl font-bold text-center mb-10">อุปกรณ์ที่ยืม</h1>
+          <div className="bg-white shadow-lg rounded-lg p-6">
             {/* Header Row */}
-            <div className='grid grid-cols-5 text-gray-700 font-semibold border-b pb-4 mb-4 text-center'>
+            <div className="grid grid-cols-4 text-gray-700 font-semibold border-b pb-4 mb-4 text-center">
               <div>รายการอุปกรณ์</div>
               <div>ราคาต่อชิ้น</div>
               <div>จำนวน</div>
-              <div>ราคารวม</div>
               <div>ลบ</div>
             </div>
 
-            {/* Borrowed Items */}
-            {borrowedItems.length === 0 ? (
-              <div className='text-center text-gray-500 py-8'>ไม่มีอุปกรณ์ที่ยืม</div>
+            {/* Equipment Items */}
+            {equipmentItems.length === 0 ? (
+              <div className="text-center text-gray-500 py-8">ไม่มีอุปกรณ์ที่ยืม</div>
             ) : (
-              borrowedItems.map((item, index) => (
-                <div
-                  key={index}
-                  className='grid grid-cols-5 gap-4 items-center py-4 border-b text-center'
-                >
-                  <div>
-                    <h2 className='text-lg font-bold text-gray-800'>{item.attributes?.label}</h2>
-                    <p className='text-sm text-gray-500'>{item.attributes?.category || "N/A"}</p>
+              <div className="space-y-4">
+                {equipmentItems.map((item, index) => (
+                  <div
+                    key={index}
+                    className="grid grid-cols-4 gap-4 items-center py-2 px-4 border rounded-lg shadow-sm bg-gray-50"
+                  >
+                    <div>
+                      <h2 className="text-lg font-bold mx-20 text-gray-800">{item.attributes?.label}</h2>
+                      <p className="text-sm mx-20 text-gray-500">{item.attributes?.category || "N/A"}</p>
+                    </div>
+                    <div className="text-center">{item.attributes?.Price} ฿</div>
+                    <div className="text-center">{item.attributes?.amount}</div>
+                    <div className="text-center">
+                      <IoClose
+                        className="text-red-500 mx-44 text-xl cursor-pointer hover:text-red-700"
+                        onClick={() => handleDeleteItem(item.id)}
+                      />
+                    </div>
                   </div>
-                  <div>{item.attributes?.Price} ฿</div>
-                  <div>{item.quantity}</div>
-                  <div>{item.attributes?.Price * item.quantity} ฿</div>
-                  <div>
-                    <IoClose
-                      className='text-red-500 text-xl cursor-pointer mx-32 hover:text-red-700'
-                      onClick={() => handleDeleteItem(item.id)}
-                    />
-                  </div>
-                </div>
-              ))
+                ))}
+
+                {/* Total Price */}
+                
+              </div>
             )}
           </div>
 
           {/* Button */}
-          <div className='flex justify-end mt-6'>
+          <div className="flex justify-end mt-6">
             <button
-              className='bg-blue-500 text-white py-2 px-6 rounded-lg shadow-md hover:bg-blue-600 transition duration-200'
+              className="bg-blue-500 text-white py-2 px-6 rounded-lg shadow-md hover:bg-blue-600 transition duration-200"
               onClick={handleGoToBorrowForm}
             >
               พิมพ์แบบฟอร์มยืมอุปกรณ์

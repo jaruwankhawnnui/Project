@@ -275,7 +275,7 @@ const Home = () => {
 
   // Fetch data from API
   useEffect(() => {
-    fetch("http://172.20.160.1:1337/api/cartadmins?populate=*")
+    fetch("http://172.25.176.1:1337/api/cartadmins?populate=*")
       .then((response) => {
         if (!response.ok) {
           throw new Error(
