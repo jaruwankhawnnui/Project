@@ -7,31 +7,21 @@ import { useSession } from "next-auth/react";
 export default function ApprovalPage() {
   const { data: session } = useSession();
   const [borrowRequests, setBorrowRequests] = useState([]);
-  const [statusFilter, setStatusFilter] = useState("ทั้งหมด");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
 
   // Fetch borrow requests from API
   useEffect(() => {
     const fetchBorrowRequests = async () => {
-      if (!session || !session.user || !session.user.email) {
-        console.error("No user session found.");
-        return;
-      }
-
       try {
-        const response = await fetch(
-          `http://172.24.32.1:1337/api/borrows?populate=*`
-        );
+        const response = await fetch(`http://172.24.32.1:1337/api/borrows?populate=*`);
         if (response.ok) {
           const data = await response.json();
           const formattedRequests = data.data.map((item) => ({
             id: item.id,
             code: item.attributes.code || "N/A",
             name: item.attributes.name || "N/A",
-            item: item.attributes.label || "N/A",
-            borrowDate: item.attributes.borrowDate || "N/A",
-            returnDate: item.attributes.returnDate || "N/A",
+            label: item.attributes.label || "N/A",
+            borrowDate: item.attributes.Borrowing_date || "N/A",
+            returnDate: item.attributes.Due || "N/A",
             status: item.attributes.status || "รอการอนุมัติ",
           }));
           setBorrowRequests(formattedRequests);
@@ -44,9 +34,9 @@ export default function ApprovalPage() {
     };
 
     fetchBorrowRequests();
-  }, [session]);
+  }, []);
 
-  const saveToStrapi = async (data) => {
+  const saveToCheck = async (data) => {
     try {
       const response = await fetch("http://172.24.32.1:1337/api/checks", {
         method: "POST",
@@ -57,43 +47,41 @@ export default function ApprovalPage() {
       });
 
       if (!response.ok) {
-        console.error("Error saving data to Strapi:", await response.text());
-      } else {
-        console.log("Data saved to Strapi successfully.");
+        console.error("Error saving to /api/checks:", await response.text());
+        alert("เกิดข้อผิดพลาดในการบันทึกสถานะ");
       }
     } catch (error) {
-      console.error("Error saving to Strapi:", error);
+      console.error("Error saving to /api/checks:", error);
+      alert("เกิดข้อผิดพลาดในการบันทึกสถานะ");
     }
   };
 
   const handleApprove = async (id) => {
     try {
+      const request = borrowRequests.find((req) => req.id === id);
+      if (!request) return;
+
       const response = await fetch(`http://172.24.32.1:1337/api/borrows/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: { status: "อนุมัติแล้ว" } }),
+        body: JSON.stringify({ data: { status: "กำลังยืม" } }),
       });
 
       if (response.ok) {
         setBorrowRequests((prev) =>
           prev.map((request) =>
-            request.id === id ? { ...request, status: "อนุมัติแล้ว" } : request
+            request.id === id ? { ...request, status: "กำลังยืม" } : request
           )
         );
 
-        const request = borrowRequests.find((req) => req.id === id);
-        if (request) {
-          // Save approval data to Strapi
-          await saveToStrapi({
-            code: request.code,
-            name: request.name,
-            email: session.user.email,
-            item: request.item,
-            status: "อนุมัติแล้ว",
-            borrowDate: request.borrowDate,
-            returnDate: request.returnDate,
-          });
-        }
+        // Save to /api/checks
+        await saveToCheck({
+          name: request.name,
+          label: request.label,
+          status: "กำลังยืม",
+          Borrowing_date: request.borrowDate,
+          Due: request.returnDate,
+        });
 
         alert("การอนุมัติสำเร็จ");
       } else {
@@ -108,6 +96,9 @@ export default function ApprovalPage() {
 
   const handleReject = async (id) => {
     try {
+      const request = borrowRequests.find((req) => req.id === id);
+      if (!request) return;
+
       const response = await fetch(`http://172.24.32.1:1337/api/borrows/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -121,19 +112,14 @@ export default function ApprovalPage() {
           )
         );
 
-        const request = borrowRequests.find((req) => req.id === id);
-        if (request) {
-          // Save rejection data to Strapi
-          await saveToStrapi({
-            code: request.code,
-            name: request.name,
-            email: session.user.email,
-            item: request.item,
-            status: "ถูกปฏิเสธ",
-            borrowDate: request.borrowDate,
-            returnDate: request.returnDate,
-          });
-        }
+        // Save to /api/checks
+        await saveToCheck({
+          name: request.name,
+          label: request.label,
+          status: "ถูกปฏิเสธ",
+          Borrowing_date: request.borrowDate,
+          Due: request.returnDate,
+        });
 
         alert("การปฏิเสธสำเร็จ");
       } else {
@@ -146,36 +132,18 @@ export default function ApprovalPage() {
     }
   };
 
-  const filteredRequests = borrowRequests.filter((request) => {
-    if (statusFilter !== "ทั้งหมด" && request.status !== statusFilter) return false;
-    if (startDate && new Date(request.borrowDate) < new Date(startDate)) return false;
-    if (endDate && new Date(request.returnDate) > new Date(endDate)) return false;
-    return true;
-  });
-
   return (
     <div className="bg-gray-100 min-h-screen">
       <Headeradmin>
         <div className="min-h-screen bg-gray-100 p-6">
           <header className="flex items-center justify-between bg-white p-4 shadow-sm rounded-md">
             <h1 className="text-xl font-bold">การอนุมัติการยืม</h1>
-            <div className="flex gap-4">
-              <input
-                type="text"
-                placeholder="ค้นหา..."
-                className="border border-gray-300 rounded-md px-4 py-2"
-              />
-              <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
-                กลับ
-              </button>
-            </div>
           </header>
 
           <section className="my-6 bg-white p-4 shadow-sm rounded-md">
             <table className="w-full border-collapse border border-gray-200 text-sm">
               <thead>
                 <tr className="bg-gray-100 text-left">
-                  <th className="border border-gray-200 px-4 py-2">รหัสคำขอ</th>
                   <th className="border border-gray-200 px-4 py-2">ชื่อผู้ยืม</th>
                   <th className="border border-gray-200 px-4 py-2">สิ่งของที่ยืม</th>
                   <th className="border border-gray-200 px-4 py-2">วันที่ยืม</th>
@@ -185,13 +153,16 @@ export default function ApprovalPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredRequests.map((request) => (
+                {borrowRequests.map((request) => (
                   <tr key={request.id} className="hover:bg-gray-50">
-                    <td className="border border-gray-200 px-4 py-2">{request.code}</td>
                     <td className="border border-gray-200 px-4 py-2">{request.name}</td>
-                    <td className="border border-gray-200 px-4 py-2">{request.item}</td>
-                    <td className="border border-gray-200 px-4 py-2">{request.borrowDate}</td>
-                    <td className="border border-gray-200 px-4 py-2">{request.returnDate}</td>
+                    <td className="border border-gray-200 px-4 py-2">{request.label}</td>
+                    <td className="border border-gray-200 px-4 py-2">
+                      {new Date(request.borrowDate).toLocaleDateString("th-TH")}
+                    </td>
+                    <td className="border border-gray-200 px-4 py-2">
+                      {new Date(request.returnDate).toLocaleDateString("th-TH")}
+                    </td>
                     <td className="border border-gray-200 px-4 py-2">{request.status}</td>
                     <td className="border border-gray-200 px-4 py-2 flex gap-2">
                       <button

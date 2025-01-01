@@ -7,8 +7,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 const EquipmentPage = () => {
-  const [userEquipmentItems, setUserEquipmentItems] = useState([]); // รายการอุปกรณ์ที่ผู้ใช้ยืม
-  const [userBorrowedItems, setUserBorrowedItems] = useState([]); // ประวัติการยืมของผู้ใช้
+  const [userEquipmentItems, setUserEquipmentItems] = useState([]);
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -41,92 +40,57 @@ const EquipmentPage = () => {
       }
     };
 
-    const fetchBorrowedItems = async () => {
-      try {
-        const response = await fetch(
-          `http://172.24.32.1:1337/api/borrows?filters[email][$eq]=${session.user.email}&populate=image`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          const borrowedItems = data.data.map((item) => ({
-            id: item.id,
-            label: item.attributes.label,
-            price: item.attributes.Price,
-            amount: item.attributes.amount,
-            imageUrl: item.attributes.image?.data?.attributes?.url || null,
-          }));
-          setUserBorrowedItems(borrowedItems);
-        } else {
-          console.error("Failed to fetch borrowed items:", await response.text());
-        }
-      } catch (error) {
-        console.error("Error fetching borrowed items:", error);
-      }
-    };
-
     fetchUserEquipmentItems();
-    fetchBorrowedItems();
   }, [session?.user?.email]);
 
-  const handleDeleteItem = async (id) => {
-    try {
-      const response = await fetch(`http://172.24.32.1:1337/api/equipment/${id}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        setUserEquipmentItems(userEquipmentItems.filter((item) => item.id !== id));
-        alert("ลบอุปกรณ์สำเร็จ");
-      } else {
-        console.error("Error deleting item:", await response.text());
-        alert("เกิดข้อผิดพลาดในการลบอุปกรณ์");
-      }
-    } catch (error) {
-      console.error("Error deleting item:", error);
-      alert("เกิดข้อผิดพลาดในการลบอุปกรณ์");
+  const handleGoToBorrowForm = async () => {
+    if (!session?.user?.email) {
+      alert("กรุณาเข้าสู่ระบบก่อนดำเนินการ");
+      return;
     }
-  };
 
-    // Handle submit and save data to Strapi
-    const handleGoToBorrowForm = async () => {
-      try {
-        // Prepare data for Strapi
-        const borrowData = userEquipmentItems.map((item) => ({
+    try {
+      const borrowData = userEquipmentItems.map((item) => {
+        const borrowingDate = new Date().toISOString(); // วันที่และเวลาปัจจุบัน
+        const dueDate = new Date();
+        dueDate.setMonth(dueDate.getMonth() + 1); // เพิ่ม 1 เดือน
+
+        return {
           label: item.attributes?.label || "Unknown Item",
           Price: item.attributes?.Price || 0,
           amount: item.attributes?.amount || 0,
           email: session?.user?.email || "Unknown Email",
           name: session?.user?.name || "Unknown User",
-        }));
-    
-        // Save each item to Strapi
-        for (const data of borrowData) {
-          const response = await fetch("http://172.24.32.1:1337/api/borrows", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ data }),
-          });
-    
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error("Error saving to Strapi:", errorText);
-            alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
-            return;
-          }
+          Borrowing_date: borrowingDate, // บันทึกเวลายืมปัจจุบัน
+          Due: dueDate.toISOString(), // กำหนดเวลาคืน 1 เดือน
+          image: item.attributes.image?.data?.id || null,
+        };
+      });
+
+      for (const data of borrowData) {
+        const response = await fetch("http://172.24.32.1:1337/api/borrows", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ data }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Error saving to Strapi:", errorText);
+          alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+          return;
         }
-    
-        // Store userEquipmentItems in sessionStorage
-        sessionStorage.setItem("borrowedEquipment", JSON.stringify(userEquipmentItems));
-        alert("บันทึกข้อมูลสำเร็จ!");
-        router.push("/borrow-form");
-      } catch (error) {
-        console.error("Error saving data to Strapi:", error);
-        alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
       }
-    };
-    
+
+      alert("บันทึกข้อมูลสำเร็จ!");
+      router.push("/borrow-form");
+    } catch (error) {
+      console.error("Error saving data to Strapi:", error);
+      alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+    }
+  };
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -177,16 +141,14 @@ const EquipmentPage = () => {
             )}
           </div>
 
-          {/* ประวัติการยืม */}
-          
+          {/* ปุ่มพิมพ์แบบฟอร์ม */}
           <button
-              className="bg-blue-500 text-white py-2 px-6 mt-4  rounded-lg shadow-md hover:bg-blue-600 transition duration-200"
-              onClick={handleGoToBorrowForm}
-            >
-              พิมพ์แบบฟอร์มยืมอุปกรณ์
-            </button>
+            className="bg-blue-500 text-white py-2 px-6 mt-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-200"
+            onClick={handleGoToBorrowForm}
+          >
+            พิมพ์แบบฟอร์มยืมอุปกรณ์
+          </button>
         </div>
-        
       </Layout>
     </div>
   );

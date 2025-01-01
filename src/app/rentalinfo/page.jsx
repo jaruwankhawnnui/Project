@@ -25,10 +25,9 @@ const RentalInfo = () => {
             label: item.attributes.label,
             price: item.attributes.Price,
             quantity: item.attributes.amount,
-            borrowDate: item.attributes.borrowDate,
-            returnDate: item.attributes.returnDate,
-            status: item.attributes.status,
-            image: item.attributes.image?.data?.attributes?.url || "/default.jpg",
+            borrowingDate: item.attributes.Borrowing_date,
+            dueDate: item.attributes.Due,
+            status: item.attributes.status || "N/A", // Fetch existing status
           }));
           setRentalItems(items);
         } else {
@@ -42,29 +41,23 @@ const RentalInfo = () => {
     fetchRentalData();
   }, [session?.user?.email]);
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "not_returned":
-        return "bg-red-200";
-      case "borrowing":
-        return "bg-yellow-200";
-      case "returned":
-        return "bg-green-200";
-      default:
-        return "";
-    }
-  };
+  const updateStatusInBorrow = async (id, status) => {
+    try {
+      const response = await fetch(`http://172.24.32.1:1337/api/borrows/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ data: { status } }),
+      });
 
-  const getStatusText = (status) => {
-    switch (status) {
-      case "not_returned":
-        return "ไม่คืน";
-      case "borrowing":
-        return "กำลังยืม";
-      case "returned":
-        return "คืนแล้ว";
-      default:
-        return "สถานะไม่ระบุ";
+      if (response.ok) {
+        console.log(`Status for item ${id} updated to: ${status}`);
+      } else {
+        console.error(`Failed to update status for item ${id}:`, await response.text());
+      }
+    } catch (error) {
+      console.error("Error updating status in /api/borrows:", error);
     }
   };
 
@@ -86,6 +79,34 @@ const RentalInfo = () => {
       alert("เกิดข้อผิดพลาดในการยกเลิก");
     }
   };
+
+  const getStatusClass = (status, dueDate) => {
+    const now = new Date();
+    if (status === "กำลังยืม") return "bg-yellow-200";
+    if (status === "ปฏิเสธ") return "bg-gray-200"; // Rejected status
+    if (new Date(dueDate) < now) return "bg-red-200";
+    return "";
+  };
+
+  const getStatusText = (status, dueDate) => {
+    const now = new Date();
+    if (status === "กำลังยืม") return "กำลังยืม";
+    if (status === "ปฏิเสธ") return "ถูกปฏิเสธ"; // Rejected status
+    if (new Date(dueDate) < now) return "เลยกำหนด";
+    return "N/A";
+  };
+
+  useEffect(() => {
+    // Update status in /api/borrows based on due dates
+    rentalItems.forEach((item) => {
+      const now = new Date();
+      if (new Date(item.dueDate) < now && item.status !== "เลยกำหนด") {
+        updateStatusInBorrow(item.id, "เลยกำหนด");
+      } else if (item.status === "กำลังยืม") {
+        updateStatusInBorrow(item.id, "กำลังยืม");
+      }
+    });
+  }, [rentalItems]);
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -111,16 +132,12 @@ const RentalInfo = () => {
               rentalItems.map((item, index) => (
                 <div
                   key={index}
-                  className={`grid grid-cols-8 gap-4 items-center py-4 px-4 mb-4 rounded-lg shadow ${getStatusColor(
-                    item.status
+                  className={`grid grid-cols-8 gap-4 items-center py-4 px-4 mb-4 rounded-lg shadow ${getStatusClass(
+                    item.status,
+                    item.dueDate
                   )}`}
                 >
                   <div className="flex items-center">
-                    {/* <img
-                      src={item.image}
-                      alt={item.label}
-                      className="h-12 w-12 object-cover rounded-lg shadow-md"
-                    /> */}
                     <div className="ml-4">
                       <p className="text-lg font-bold text-gray-800">{item.label}</p>
                     </div>
@@ -128,12 +145,18 @@ const RentalInfo = () => {
                   <div className="text-center">{item.price} ฿</div>
                   <div className="text-center">{item.quantity}</div>
                   <div className="text-center">{item.price * item.quantity} ฿</div>
-                  <div className="text-center">{item.borrowDate || "N/A"}</div>
-                  <div className="text-center">{item.returnDate || "N/A"}</div>
-                  <div className="text-center">{getStatusText(item.status)}</div>
+                  <div className="text-center">
+                    {new Date(item.borrowingDate).toLocaleDateString("th-TH") || "N/A"}
+                  </div>
+                  <div className="text-center">
+                    {new Date(item.dueDate).toLocaleDateString("th-TH") || "N/A"}
+                  </div>
+                  <div className="text-center font-semibold">
+                    {getStatusText(item.status, item.dueDate)}
+                  </div>
                   <div className="text-center">
                     <IoClose
-                      className="text-red-500 text-xl mx-24 cursor-pointer hover:text-red-700"
+                      className="text-red-500 mx-24 text-xl cursor-pointer hover:text-red-700"
                       onClick={() => handleCancelItem(item.id)}
                     />
                   </div>
