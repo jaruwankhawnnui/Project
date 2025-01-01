@@ -56,38 +56,44 @@ export default function ApprovalPage() {
     }
   };
 
+  const updateStatus = async (id, status) => {
+    try {
+      const response = await fetch(`http://172.24.32.1:1337/api/borrows/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: { status } }),
+      });
+
+      if (!response.ok) {
+        console.error("Error updating status:", await response.text());
+      }
+    } catch (error) {
+      console.error("Error updating status in Strapi:", error);
+    }
+  };
+
   const handleApprove = async (id) => {
     try {
       const request = borrowRequests.find((req) => req.id === id);
       if (!request) return;
 
-      const response = await fetch(`http://172.24.32.1:1337/api/borrows/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: { status: "กำลังยืม" } }),
+      await updateStatus(id, "กำลังยืม");
+
+      setBorrowRequests((prev) =>
+        prev.map((request) =>
+          request.id === id ? { ...request, status: "กำลังยืม" } : request
+        )
+      );
+
+      await saveToCheck({
+        name: request.name,
+        label: request.label,
+        status: "กำลังยืม",
+        Borrowing_date: request.borrowDate,
+        Due: request.returnDate,
       });
 
-      if (response.ok) {
-        setBorrowRequests((prev) =>
-          prev.map((request) =>
-            request.id === id ? { ...request, status: "กำลังยืม" } : request
-          )
-        );
-
-        // Save to /api/checks
-        await saveToCheck({
-          name: request.name,
-          label: request.label,
-          status: "กำลังยืม",
-          Borrowing_date: request.borrowDate,
-          Due: request.returnDate,
-        });
-
-        alert("การอนุมัติสำเร็จ");
-      } else {
-        console.error("Error approving request:", await response.text());
-        alert("เกิดข้อผิดพลาดในการอนุมัติ");
-      }
+      alert("การอนุมัติสำเร็จ");
     } catch (error) {
       console.error("Error approving request:", error);
       alert("เกิดข้อผิดพลาดในการอนุมัติ");
@@ -99,37 +105,64 @@ export default function ApprovalPage() {
       const request = borrowRequests.find((req) => req.id === id);
       if (!request) return;
 
-      const response = await fetch(`http://172.24.32.1:1337/api/borrows/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: { status: "ถูกปฏิเสธ" } }),
+      await updateStatus(id, "ถูกปฏิเสธ");
+
+      setBorrowRequests((prev) =>
+        prev.map((request) =>
+          request.id === id ? { ...request, status: "ถูกปฏิเสธ" } : request
+        )
+      );
+
+      await saveToCheck({
+        name: request.name,
+        label: request.label,
+        status: "ถูกปฏิเสธ",
+        Borrowing_date: request.borrowDate,
+        Due: request.returnDate,
       });
 
-      if (response.ok) {
-        setBorrowRequests((prev) =>
-          prev.map((request) =>
-            request.id === id ? { ...request, status: "ถูกปฏิเสธ" } : request
-          )
-        );
-
-        // Save to /api/checks
-        await saveToCheck({
-          name: request.name,
-          label: request.label,
-          status: "ถูกปฏิเสธ",
-          Borrowing_date: request.borrowDate,
-          Due: request.returnDate,
-        });
-
-        alert("การปฏิเสธสำเร็จ");
-      } else {
-        console.error("Error rejecting request:", await response.text());
-        alert("เกิดข้อผิดพลาดในการปฏิเสธ");
-      }
+      alert("การปฏิเสธสำเร็จ");
     } catch (error) {
       console.error("Error rejecting request:", error);
       alert("เกิดข้อผิดพลาดในการปฏิเสธ");
     }
+  };
+
+  const handleMarkReturned = async (id) => {
+    try {
+      const request = borrowRequests.find((req) => req.id === id);
+      if (!request) return;
+
+      await updateStatus(id, "คืนแล้ว");
+
+      setBorrowRequests((prev) =>
+        prev.map((request) =>
+          request.id === id ? { ...request, status: "คืนแล้ว" } : request
+        )
+      );
+
+      await saveToCheck({
+        name: request.name,
+        label: request.label,
+        status: "คืนแล้ว",
+        Borrowing_date: request.borrowDate,
+        Due: request.returnDate,
+      });
+
+      alert("การบันทึกคืนสำเร็จ");
+    } catch (error) {
+      console.error("Error marking item as returned:", error);
+      alert("เกิดข้อผิดพลาดในการบันทึกคืน");
+    }
+  };
+
+  const getStatusClass = (status, returnDate) => {
+    const now = new Date();
+    if (status === "คืนแล้ว") return "bg-green-200";
+    if (status === "กำลังยืม") return "bg-yellow-200";
+    if (new Date(returnDate) < now) return "bg-red-200";
+    if (status === "ถูกปฏิเสธ") return "bg-gray-200";
+    return "";
   };
 
   return (
@@ -154,7 +187,10 @@ export default function ApprovalPage() {
               </thead>
               <tbody>
                 {borrowRequests.map((request) => (
-                  <tr key={request.id} className="hover:bg-gray-50">
+                  <tr
+                    key={request.id}
+                    className={`${getStatusClass(request.status, request.returnDate)} hover:bg-gray-50`}
+                  >
                     <td className="border border-gray-200 px-4 py-2">{request.name}</td>
                     <td className="border border-gray-200 px-4 py-2">{request.label}</td>
                     <td className="border border-gray-200 px-4 py-2">
@@ -176,6 +212,12 @@ export default function ApprovalPage() {
                         onClick={() => handleReject(request.id)}
                       >
                         ปฏิเสธ
+                      </button>
+                      <button
+                        className="bg-blue-500 text-white px-4 py-1 rounded-md hover:bg-blue-600"
+                        onClick={() => handleMarkReturned(request.id)}
+                      >
+                        คืนแล้ว
                       </button>
                     </td>
                   </tr>

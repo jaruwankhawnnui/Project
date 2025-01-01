@@ -83,7 +83,8 @@ const RentalInfo = () => {
   const getStatusClass = (status, dueDate) => {
     const now = new Date();
     if (status === "กำลังยืม") return "bg-yellow-200";
-    if (status === "ปฏิเสธ") return "bg-gray-200"; // Rejected status
+    if (status === "ถูกปฏิเสธ") return "bg-gray-200";
+    if (status === "คืนแล้ว") return "bg-green-200"; // Rejected status
     if (new Date(dueDate) < now) return "bg-red-200";
     return "";
   };
@@ -91,7 +92,8 @@ const RentalInfo = () => {
   const getStatusText = (status, dueDate) => {
     const now = new Date();
     if (status === "กำลังยืม") return "กำลังยืม";
-    if (status === "ปฏิเสธ") return "ถูกปฏิเสธ"; // Rejected status
+    if (status === "ถูกปฏิเสธ") return "ถูกปฏิเสธ"; 
+    if (status === "คืนแล้ว") return "คืนแล้ว"; // Rejected status
     if (new Date(dueDate) < now) return "เลยกำหนด";
     return "N/A";
   };
@@ -115,7 +117,7 @@ const RentalInfo = () => {
           <h1 className="text-4xl font-bold text-center mb-10">แสดงข้อมูลการยืม</h1>
           <div className="bg-white shadow-lg rounded-lg p-6">
             {/* Header Row */}
-            <div className="grid grid-cols-8 text-gray-700 font-semibold border-b pb-4 mb-4 text-center">
+            <div className="grid grid-cols-7 text-gray-700 font-semibold border-b pb-4 mb-4 text-center">
               <div>รายการอุปกรณ์</div>
               <div>ราคาต่อชิ้น</div>
               <div>จำนวน</div>
@@ -123,7 +125,7 @@ const RentalInfo = () => {
               <div>วันที่ยืม</div>
               <div>กำหนดคืน</div>
               <div>สถานะ</div>
-              <div>ยกเลิก</div>
+             
             </div>
 
             {rentalItems.length === 0 ? (
@@ -132,7 +134,7 @@ const RentalInfo = () => {
               rentalItems.map((item, index) => (
                 <div
                   key={index}
-                  className={`grid grid-cols-8 gap-4 items-center py-4 px-4 mb-4 rounded-lg shadow ${getStatusClass(
+                  className={`grid grid-cols-7 gap-4 items-center py-4 px-4 mb-4 rounded-lg shadow ${getStatusClass(
                     item.status,
                     item.dueDate
                   )}`}
@@ -155,10 +157,7 @@ const RentalInfo = () => {
                     {getStatusText(item.status, item.dueDate)}
                   </div>
                   <div className="text-center">
-                    <IoClose
-                      className="text-red-500 mx-24 text-xl cursor-pointer hover:text-red-700"
-                      onClick={() => handleCancelItem(item.id)}
-                    />
+                   
                   </div>
                 </div>
               ))
