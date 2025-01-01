@@ -43,6 +43,25 @@ const EquipmentPage = () => {
     fetchUserEquipmentItems();
   }, [session?.user?.email]);
 
+  const handleDeleteItem = async (id) => {
+    try {
+      const response = await fetch(`http://172.24.32.1:1337/api/equipment/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setUserEquipmentItems((prevItems) => prevItems.filter((item) => item.id !== id));
+        alert("อุปกรณ์ถูกลบออกจากระบบสำเร็จ");
+      } else {
+        console.error("Failed to delete item from Strapi:", await response.text());
+        alert("เกิดข้อผิดพลาดในการลบอุปกรณ์");
+      }
+    } catch (error) {
+      console.error("Error deleting item from Strapi:", error);
+      alert("เกิดข้อผิดพลาดในการลบอุปกรณ์");
+    }
+  };
+
   const handleGoToBorrowForm = async () => {
     if (!session?.user?.email) {
       alert("กรุณาเข้าสู่ระบบก่อนดำเนินการ");
@@ -51,9 +70,9 @@ const EquipmentPage = () => {
 
     try {
       const borrowData = userEquipmentItems.map((item) => {
-        const borrowingDate = new Date().toISOString(); // วันที่และเวลาปัจจุบัน
+        const borrowingDate = new Date().toISOString();
         const dueDate = new Date();
-        dueDate.setMonth(dueDate.getMonth() + 1); // เพิ่ม 1 เดือน
+        dueDate.setMonth(dueDate.getMonth() + 1);
 
         return {
           label: item.attributes?.label || "Unknown Item",
@@ -61,8 +80,8 @@ const EquipmentPage = () => {
           amount: item.attributes?.amount || 0,
           email: session?.user?.email || "Unknown Email",
           name: session?.user?.name || "Unknown User",
-          Borrowing_date: borrowingDate, // บันทึกเวลายืมปัจจุบัน
-          Due: dueDate.toISOString(), // กำหนดเวลาคืน 1 เดือน
+          Borrowing_date: borrowingDate,
+          Due: dueDate.toISOString(),
           image: item.attributes.image?.data?.id || null,
         };
       });
@@ -104,40 +123,49 @@ const EquipmentPage = () => {
             {userEquipmentItems.length === 0 ? (
               <div className="text-center text-gray-500 py-8">ไม่มีอุปกรณ์ที่ยืม</div>
             ) : (
-              <div className="space-y-4">
-                {userEquipmentItems.map((item, index) => (
-                  <div
-                    key={index}
-                    className="grid grid-cols-4 gap-4 items-center py-2 px-4 border rounded-lg shadow-sm bg-gray-50"
-                  >
-                    <div className="flex items-center">
-                      {item.imageUrl ? (
-                        <img
-                          src={item.imageUrl}
-                          alt={item.attributes?.label || "Unknown Item"}
-                          className="w-32 h-32 object-cover rounded-lg mr-4"
-                        />
-                      ) : (
-                        <div className="w-16 h-16 bg-gray-200 rounded-lg mr-4 flex items-center justify-center text-gray-500">
-                          ไม่มีรูปภาพ
+              <>
+                {/* Table Headings */}
+                <div className="grid grid-cols-4 gap-4 py-2 px-4 border-b font-bold text-gray-700">
+                  <div>รายการ</div>
+                  <div className="text-center">ราคา</div>
+                  <div className="text-center">จำนวน</div>
+                  <div className="text-center">การจัดการ</div>
+                </div>
+                <div className="space-y-4">
+                  {userEquipmentItems.map((item, index) => (
+                    <div
+                      key={index}
+                      className="grid grid-cols-4 gap-4 items-center py-2 px-4 border rounded-lg shadow-sm bg-gray-50"
+                    >
+                      <div className="flex items-center">
+                        {item.imageUrl ? (
+                          <img
+                            src={item.imageUrl}
+                            alt={item.attributes?.label || "Unknown Item"}
+                            className="w-32 h-32 object-cover rounded-lg mr-4"
+                          />
+                        ) : (
+                          <div className="w-16 h-16 bg-gray-200 rounded-lg mr-4 flex items-center justify-center text-gray-500">
+                            ไม่มีรูปภาพ
+                          </div>
+                        )}
+                        <div>
+                          <h2 className="text-lg font-bold text-gray-800">{item.attributes?.label}</h2>
+                          <p className="text-sm text-gray-500">{item.attributes?.category || "N/A"}</p>
                         </div>
-                      )}
-                      <div>
-                        <h2 className="text-lg font-bold text-gray-800">{item.attributes?.label}</h2>
-                        <p className="text-sm text-gray-500">{item.attributes?.category || "N/A"}</p>
+                      </div>
+                      <div className="text-center">{item.attributes?.Price} ฿</div>
+                      <div className="text-center">{item.attributes?.amount}</div>
+                      <div className="text-center">
+                        <IoClose
+                          className="text-red-500 text-xl cursor-pointer hover:text-red-700"
+                          onClick={() => handleDeleteItem(item.id)}
+                        />
                       </div>
                     </div>
-                    <div className="text-center">{item.attributes?.Price} ฿</div>
-                    <div className="text-center">{item.attributes?.amount}</div>
-                    <div className="text-center">
-                      <IoClose
-                        className="text-red-500 text-xl cursor-pointer hover:text-red-700"
-                        onClick={() => handleDeleteItem(item.id)}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
 

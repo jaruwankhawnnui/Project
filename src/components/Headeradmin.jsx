@@ -22,12 +22,11 @@ export default function Navbar({ children }) {
           <div className="hidden md:flex space-x-8 font-medium">
             <a href="/admin/" className="text-gray-700 hover:text-black">Billboard</a>
             <a href="/admin/CreateCategory" className="text-gray-700 hover:text-black">Categories</a>
-            <a href="/admin/" className="text-gray-700 hover:text-black">ยืม-คืนอุปกรณ์</a>
             <a href="/admin/cartadmin" className="text-gray-700 hover:text-black">อุปกรณ์</a>
             <a href="/admin/addwebnew" className="text-gray-700 hover:text-black">ข่าวสาร</a>
             <a href="/admin/addcontact" className="text-gray-700 hover:text-black">ข้อมูลการติดต่อ</a>
             <a href="/admin/Listadmin" className="text-gray-700 hover:text-black">รายการอุปกรณ์</a>
-            <a href="/admin/check" className="text-gray-700 hover:text-black">อนุมัติ</a>
+            <a href="/admin/check" className="text-gray-700 hover:text-black">ยืม-คืนอุปกรณ์</a>
           </div>
 
           
