@@ -12,7 +12,7 @@ export default function ApprovalPage() {
   useEffect(() => {
     const fetchBorrowRequests = async () => {
       try {
-        const response = await fetch(`http://172.24.32.1:1337/api/borrows?populate=*`);
+        const response = await fetch(`http://172.29.80.1:1337/api/borrows?populate=*`);
         if (response.ok) {
           const data = await response.json();
           const formattedRequests = data.data.map((item) => ({
@@ -38,7 +38,7 @@ export default function ApprovalPage() {
 
   const saveToCheck = async (data) => {
     try {
-      const response = await fetch("http://172.24.32.1:1337/api/checks", {
+      const response = await fetch("http://172.29.80.1:1337/api/checks", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -58,7 +58,7 @@ export default function ApprovalPage() {
 
   const updateStatus = async (id, status) => {
     try {
-      const response = await fetch(`http://172.24.32.1:1337/api/borrows/${id}`, {
+      const response = await fetch(`http://172.29.80.1:1337/api/borrows/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ data: { status } }),

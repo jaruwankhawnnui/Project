@@ -15,7 +15,7 @@ const RentalInfo = () => {
 
       try {
         const response = await fetch(
-          `http://172.24.32.1:1337/api/borrows?filters[email][$eq]=${session.user.email}&populate=*`
+          `http://172.29.80.1:1337/api/borrows?filters[email][$eq]=${session.user.email}&populate=*`
         );
 
         if (response.ok) {
@@ -43,7 +43,7 @@ const RentalInfo = () => {
 
   const updateStatusInBorrow = async (id, status) => {
     try {
-      const response = await fetch(`http://172.24.32.1:1337/api/borrows/${id}`, {
+      const response = await fetch(`http://172.29.80.1:1337/api/borrows/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -63,7 +63,7 @@ const RentalInfo = () => {
 
   const handleCancelItem = async (id) => {
     try {
-      const response = await fetch(`http://172.24.32.1:1337/api/borrows/${id}`, {
+      const response = await fetch(`http://172.29.80.1:1337/api/borrows/${id}`, {
         method: "DELETE",
       });
 

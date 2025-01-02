@@ -68,9 +68,13 @@ const MainHeader = ({ session }) => {
         <IoSearchCircleSharp className='h-9 w-8 text-gray-500' />
       </div>
       <div className='flex px-5 p-2 items-center gap-6'>
-        <div>
-          <BsChatDotsFill className='cursor-pointer h-6 w-7 text-gray-400' />
-        </div>
+      <div>
+  <BsChatDotsFill
+    className='cursor-pointer h-6 w-7 text-gray-400'
+    onClick={() => window.open("https://line.me/ti/g2/7AziMh5yNWFA4IFRKflrd5g5vYJTAp2hFJXBaw?utm_source=invitation&utm_medium=link_copy&utm_campaign=default", "_blank")}
+  />
+</div>
+
         <div>
           <SlGlobe className='cursor-pointer h-6 w-7 text-gray-400' />
         </div>

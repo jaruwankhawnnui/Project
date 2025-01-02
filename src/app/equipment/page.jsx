@@ -17,7 +17,7 @@ const EquipmentPage = () => {
     const fetchUserEquipmentItems = async () => {
       try {
         const response = await fetch(
-          `http://172.24.32.1:1337/api/equipment?filters[email][$eq]=${session.user.email}&populate=image`
+          `http://172.29.80.1:1337/api/equipment?filters[email][$eq]=${session.user.email}&populate=image`
         );
         if (response.ok) {
           const data = await response.json();
@@ -28,7 +28,7 @@ const EquipmentPage = () => {
               item.attributes.image?.data?.length > 0
                 ? item.attributes.image.data[0].attributes.url.startsWith("http")
                   ? item.attributes.image.data[0].attributes.url
-                  : `http://172.24.32.1:1337${item.attributes.image.data[0].attributes.url}`
+                  : `http://172.29.80.1:1337${item.attributes.image.data[0].attributes.url}`
                 : null,
           }));
           setUserEquipmentItems(items);
@@ -45,7 +45,7 @@ const EquipmentPage = () => {
 
   const handleDeleteItem = async (id) => {
     try {
-      const response = await fetch(`http://172.24.32.1:1337/api/equipment/${id}`, {
+      const response = await fetch(`http://172.29.80.1:1337/api/equipment/${id}`, {
         method: "DELETE",
       });
 
@@ -87,7 +87,7 @@ const EquipmentPage = () => {
       });
 
       for (const data of borrowData) {
-        const response = await fetch("http://172.24.32.1:1337/api/borrows", {
+        const response = await fetch("http://172.29.80.1:1337/api/borrows", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -129,7 +129,7 @@ const EquipmentPage = () => {
                   <div>รายการ</div>
                   <div className="text-center">ราคา</div>
                   <div className="text-center">จำนวน</div>
-                  <div className="text-center">การจัดการ</div>
+                  <div className="text-center">ยกเลิก</div>
                 </div>
                 <div className="space-y-4">
                   {userEquipmentItems.map((item, index) => (
@@ -158,7 +158,7 @@ const EquipmentPage = () => {
                       <div className="text-center">{item.attributes?.amount}</div>
                       <div className="text-center">
                         <IoClose
-                          className="text-red-500 text-xl cursor-pointer hover:text-red-700"
+                          className="text-red-500 text-xl mx-40 cursor-pointer hover:text-red-700"
                           onClick={() => handleDeleteItem(item.id)}
                         />
                       </div>

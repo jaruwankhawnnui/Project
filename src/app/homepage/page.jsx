@@ -275,7 +275,7 @@ const Home = () => {
 
   // Fetch data from API
   useEffect(() => {
-    fetch("http://172.24.32.1:1337/api/cartadmins?populate=*")
+    fetch("http://172.29.80.1:1337/api/cartadmins?populate=*")
       .then((response) => {
         if (!response.ok) {
           throw new Error(
@@ -304,7 +304,7 @@ const Home = () => {
         try {
           // ตรวจสอบว่าผู้ใช้มีอยู่ในฐานข้อมูลหรือไม่
           const checkResponse = await fetch(
-            `http://172.24.32.1:1337/api/user-logins?filters[Email][$eq]=${encodeURIComponent(
+            `http://172.29.80.1:1337/api/user-logins?filters[Email][$eq]=${encodeURIComponent(
               session.user.email
             )}`
           );
@@ -318,7 +318,7 @@ const Home = () => {
 
           // หากไม่มีข้อมูลในระบบ ให้ทำการ POST เพื่อบันทึกข้อมูลใหม่
           const response = await fetch(
-            "http://172.24.32.1:1337/api/user-logins",
+            "http://172.29.80.1:1337/api/user-logins",
             {
               method: "POST",
               headers: {

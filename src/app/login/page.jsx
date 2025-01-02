@@ -220,16 +220,13 @@ export default function LoginForm2() {
 
                     {/* Google Login Button */}
                     <button
-                        type="button"
-                        className="mt-4 p-4 m-auto bg-red-600 text-white rounded-lg shadow hover:shadow-lg hover:scale-105 transition-all w-full max-w-60 flex items-center justify-center gap-2"
-                        onClick={() =>
-                            signIn("google", {
-                                callbackUrl: "/admin"
-                            })
-                        }
+                    type="button"
+                    className="mt-4 p-4 m-auto bg-red-600 text-white rounded-lg shadow hover:shadow-lg hover:scale-105 transition-all w-full max-w-60 flex items-center justify-center gap-2"
+                    onClick={() => {
+                        window.location.href = "http://localhost:3000/admin/loginadmin";
+                    }}
                     >
-                        <img src="/logo/google_logo.svg" alt="Google Login" className="w-6 h-6" />
-                        <span>Sign in with Google</span>
+                    Sign in
                     </button>
 
                     <div className="md:hidden m-auto md:col-span-4 rounded-l-lg">

@@ -27,7 +27,7 @@ const Cart = () => {
       setLoading(true);
       try {
         const response = await fetch(
-          `http://172.24.32.1:1337/api/adds?filters[email][$eq]=${session.user.email}&populate=image`
+          `http://172.29.80.1:1337/api/adds?filters[email][$eq]=${session.user.email}&populate=image`
         );
 
         if (response.ok) {
@@ -92,7 +92,7 @@ const Cart = () => {
 
   const deleteItem = async (id, index) => {
     try {
-      const response = await fetch(`http://172.24.32.1:1337/api/adds/${id}`, {
+      const response = await fetch(`http://172.29.80.1:1337/api/adds/${id}`, {
         method: "DELETE",
       });
 
@@ -130,14 +130,14 @@ const Cart = () => {
           item.attributes?.image?.data?.length > 0
             ? item.attributes.image.data[0].attributes.url.startsWith("http")
               ? item.attributes.image.data[0].attributes.url
-              : `http://172.24.32.1:1337${item.attributes.image.data[0].attributes.url}`
+              : `http://172.29.80.1:1337${item.attributes.image.data[0].attributes.url}`
             : null;
   
         console.log("Final Image URL:", imageUrl);
   
         // ค้นหาอุปกรณ์ใน Strapi ที่มีชนิดเดียวกัน
         const searchResponse = await fetch(
-          `http://172.24.32.1:1337/api/equipment?filters[label][$eq]=${item.attributes?.label}&populate=image`
+          `http://172.29.80.1:1337/api/equipment?filters[label][$eq]=${item.attributes?.label}&populate=image`
         );
   
         if (!searchResponse.ok) {
@@ -159,7 +159,7 @@ const Cart = () => {
           console.log("Updated amount:", updatedAmount);
   
           const updateResponse = await fetch(
-            `http://172.24.32.1:1337/api/equipment/${existingEquipment.id}`,
+            `http://172.29.80.1:1337/api/equipment/${existingEquipment.id}`,
             {
               method: "PUT",
               headers: {
@@ -198,7 +198,7 @@ const Cart = () => {
   
           let uploadedImageId = null;
           if (imageUrl) {
-            const imageResponse = await fetch("http://172.24.32.1:1337/api/upload", {
+            const imageResponse = await fetch("http://172.29.80.1:1337/api/upload", {
               method: "POST",
               body: formData,
             });
@@ -215,7 +215,7 @@ const Cart = () => {
             console.log("Uploaded image ID:", uploadedImageId);
           }
   
-          const createResponse = await fetch("http://172.24.32.1:1337/api/equipment", {
+          const createResponse = await fetch("http://172.29.80.1:1337/api/equipment", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

@@ -18,7 +18,7 @@ const Card = ({ params }) => {
     if (id) {
       const fetchItemData = async () => {
         try {
-          const response = await fetch(`http://172.24.32.1:1337/api/cartadmins/${id}?populate=*`);
+          const response = await fetch(`http://172.29.80.1:1337/api/cartadmins/${id}?populate=*`);
           if (!response.ok) {
             throw new Error("Failed to fetch item data");
           }
@@ -65,7 +65,7 @@ const Card = ({ params }) => {
         })
       );
   
-      const response = await fetch(`http://172.24.32.1:1337/api/adds`, {
+      const response = await fetch(`http://172.29.80.1:1337/api/adds`, {
         method: "POST",
         body: formData,
       });
