@@ -1,10 +1,10 @@
 "use client";
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Headeradmin from "@/components/Headeradmin";
 
 const Cartadmin = ({ onNewItemAdded }) => {
+  const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     Label: "",
     Price: "",
@@ -13,6 +13,24 @@ const Cartadmin = ({ onNewItemAdded }) => {
     Detail: "",
     image: null,
   });
+
+  useEffect(() => {
+    // ✅ ดึงข้อมูล `categories` จาก API
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get("http://172.31.0.1:1337/api/categoriesadmins");
+        const categoryData = response.data.data.map((cat) => ({
+          id: cat.id,
+          name: cat.attributes.Label,
+        }));
+        setCategories(categoryData);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -49,7 +67,7 @@ const Cartadmin = ({ onNewItemAdded }) => {
 
     try {
       const response = await axios.post(
-        "http://172.31.0.1:1337/api/cartadmins",
+        "http:/172.31.0.1:1337/api/cartadmins",
         data,
         {
           headers: {
@@ -57,26 +75,23 @@ const Cartadmin = ({ onNewItemAdded }) => {
           },
         }
       );
-      console.log("Success:", response.data);
+      console.log("✅ Success:", response.data);
       onNewItemAdded();
     } catch (error) {
-      console.error("Error:", error.response?.data || error.message);
+      console.error("❌ Error:", error.response?.data || error.message);
     }
   };
 
   return (
-    <div className="bg-gray-100  min-h-screen">
+    <div className="bg-gray-100 min-h-screen">
       <Headeradmin>
-        <div className=" mt-9  flex justify-center items-center">
+        <div className="mt-9 flex justify-center items-center">
           <div className="w-full max-w-md bg-white shadow-lg rounded-md p-10">
             <h1 className="text-2xl font-bold mb-4">เพิ่มรายการอุปกรณ์</h1>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <label
-                  className="block text-gray-700 font-bold mb-2"
-                  htmlFor="upload-image"
-                >
-                  Upload image
+                <label className="block text-gray-700 font-bold mb-2" htmlFor="upload-image">
+                  อัปโหลดรูปภาพ
                 </label>
                 <input
                   type="file"
@@ -88,11 +103,8 @@ const Cartadmin = ({ onNewItemAdded }) => {
                 />
               </div>
               <div className="mb-4">
-                <label
-                  className="block text-gray-700 font-bold "
-                  htmlFor="Label"
-                >
-                  Label
+                <label className="block text-gray-700 font-bold" htmlFor="Label">
+                  ชื่ออุปกรณ์
                 </label>
                 <input
                   type="text"
@@ -104,11 +116,8 @@ const Cartadmin = ({ onNewItemAdded }) => {
                 />
               </div>
               <div className="mb-4">
-                <label
-                  className="block text-gray-700 font-bold "
-                  htmlFor="Price"
-                >
-                  Price
+                <label className="block text-gray-700 font-bold" htmlFor="Price">
+                  ราคา
                 </label>
                 <input
                   type="text"
@@ -120,11 +129,8 @@ const Cartadmin = ({ onNewItemAdded }) => {
                 />
               </div>
               <div className="mb-4">
-                <label
-                  className="block text-gray-700 font-bold "
-                  htmlFor="Category"
-                >
-                  Category
+                <label className="block text-gray-700 font-bold" htmlFor="Category">
+                  หมวดหมู่
                 </label>
                 <select
                   id="Category"
@@ -133,30 +139,17 @@ const Cartadmin = ({ onNewItemAdded }) => {
                   onChange={handleChange}
                   className="w-full p-2 border rounded-md"
                 >
-                  <option value="" disabled>
-                    Select Category
-                  </option>
-                  <option value="IC">IC</option>
-                  <option value="Bord">BORD</option>
-                  <option value="BORD DIGITAL">BORD DIGITAL</option>
-                  <option value="CAPASITOR">
-                    CAPASITOR
-                  </option>
-                  <option value=" DIODE">
-                    DIODE
-                  </option>
-                  <option value="DIP JUMPER">
-                    DIP JUMPER
-                  </option>
-                  <option value="DIGITAL MULTIMETER">Digital Multimeter
-                  </option>
-                  <option value="CONNECTOR">
-                    CONNECTOR</option>
+                  <option value="">-- เลือกหมวดหมู่ --</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.name}>
+                      {category.name}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 font-bold " htmlFor="item">
-                  Item
+                <label className="block text-gray-700 font-bold" htmlFor="item">
+                  จำนวนอุปกรณ์ทั้งหมด
                 </label>
                 <input
                   type="text"
@@ -168,8 +161,8 @@ const Cartadmin = ({ onNewItemAdded }) => {
                 />
               </div>
               <div className="mb-2">
-                <label className="block text-gray-700 font-bold " htmlFor="Detail">
-                  Detail
+                <label className="block text-gray-700 font-bold" htmlFor="Detail">
+                  รายละเอียด
                 </label>
                 <input
                   type="text"
@@ -184,7 +177,7 @@ const Cartadmin = ({ onNewItemAdded }) => {
                 type="submit"
                 className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-700"
               >
-                Create
+                เพิ่มอุปกรณ์
               </button>
             </form>
           </div>

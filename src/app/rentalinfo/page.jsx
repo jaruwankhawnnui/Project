@@ -3,7 +3,6 @@
 import Layout from "@/components/Layout";
 import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
-import { IoClose } from "react-icons/io5";
 
 const RentalInfo = () => {
   const [rentalItems, setRentalItems] = useState([]);
@@ -27,7 +26,7 @@ const RentalInfo = () => {
             quantity: item.attributes.amount,
             borrowingDate: item.attributes.Borrowing_date,
             dueDate: item.attributes.Due,
-            status: item.attributes.status || "N/A", // Fetch existing status
+            status: item.attributes.status || "รอดำเนินการ", // กำหนดค่าเริ่มต้นเป็นรอดำเนินการ
           }));
           setRentalItems(items);
         } else {
@@ -41,27 +40,13 @@ const RentalInfo = () => {
     fetchRentalData();
   }, [session?.user?.email]);
 
-  const updateStatusInBorrow = async (id, status) => {
-    try {
-      await fetch(`http://172.31.0.1:1337/api/borrows/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ data: { status } }),
-      });
-    } catch (error) {
-      console.error("Error updating status in /api/borrows:", error);
-    }
-  };
-
   const getStatusClass = (status, dueDate) => {
     const now = new Date();
     if (status === "กำลังยืม") return "bg-yellow-200";
     if (status === "ถูกปฏิเสธ") return "bg-gray-200";
     if (status === "คืนแล้ว") return "bg-green-200";
     if (new Date(dueDate) < now) return "bg-red-200";
-    return "";
+    return "bg-blue-200"; // สีสำหรับ "รอดำเนินการ"
   };
 
   const getStatusText = (status, dueDate) => {
@@ -70,7 +55,7 @@ const RentalInfo = () => {
     if (status === "ถูกปฏิเสธ") return "ถูกปฏิเสธ";
     if (status === "คืนแล้ว") return "คืนแล้ว";
     if (new Date(dueDate) < now) return "เลยกำหนด";
-    return "N/A";
+    return "รอดำเนินการ";
   };
 
   useEffect(() => {
@@ -78,24 +63,22 @@ const RentalInfo = () => {
       const now = new Date();
       if (new Date(item.dueDate) < now && item.status !== "เลยกำหนด") {
         updateStatusInBorrow(item.id, "เลยกำหนด");
-      } else if (item.status === "กำลังยืม") {
-        updateStatusInBorrow(item.id, "กำลังยืม");
       }
     });
   }, [rentalItems]);
 
-  // Sorting rental items by status
-  const sortedRentalItems = rentalItems.sort((a, b) => {
-    const statusOrder = {
-      "เลยกำหนด": 1,
-      "กำลังยืม": 2,
-      "คืนแล้ว": 3,
-      "ถูกปฏิเสธ": 4,
-    };
+  // ลำดับความสำคัญของสถานะจากมากไปน้อย
+  const statusOrder = {
+    "เลยกำหนด": 1,
+    "กำลังยืม": 2,
+    "คืนแล้ว": 3,
+    "รอดำเนินการ": 4,
+  };
 
+  // เรียงลำดับรายการเช่าตามสถานะ
+  const sortedRentalItems = [...rentalItems].sort((a, b) => {
     const statusA = getStatusText(a.status, a.dueDate);
     const statusB = getStatusText(b.status, b.dueDate);
-
     return statusOrder[statusA] - statusOrder[statusB];
   });
 

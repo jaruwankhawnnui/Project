@@ -45,14 +45,14 @@ const Card = ({ params }) => {
   const addToCart = async () => {
     try {
       const formData = new FormData();
-  
+
       // ส่งข้อมูลรูปภาพ (ไฟล์)
       if (selectedItem.attributes?.image?.data?.attributes?.url) {
         const response = await fetch(selectedItem.attributes.image.data.attributes.url);
         const blob = await response.blob();
         formData.append("files.image", blob, "image.jpg");
       }
-  
+
       // ส่งข้อมูลอื่น ๆ
       formData.append(
         "data",
@@ -64,12 +64,12 @@ const Card = ({ params }) => {
           Price: selectedItem.attributes?.Price || 0,
         })
       );
-  
+
       const response = await fetch(`http://172.31.0.1:1337/api/adds`, {
         method: "POST",
         body: formData,
       });
-  
+
       if (response.ok) {
         const result = await response.json();
         console.log("เพิ่มข้อมูลใน Strapi สำเร็จ:", result);
@@ -83,7 +83,6 @@ const Card = ({ params }) => {
       alert("เกิดข้อผิดพลาด: ไม่สามารถเพิ่มอุปกรณ์ลงในรถเข็นได้");
     }
   };
-  
 
   if (!selectedItem) {
     return (
@@ -93,11 +92,15 @@ const Card = ({ params }) => {
     );
   }
 
+  const totalItems = selectedItem.attributes?.item || 0;
+  const usedItems = selectedItem.attributes?.Borrowed|| 0;
+  const remainingItems = totalItems - usedItems >= 0 ? totalItems - usedItems : 0; // ✅ ป้องกันค่าติดลบ
+
   return (
     <div className="bg-gray-100 flex flex-col min-h-screen">
       <Layout>
-        <div className="bg-white rounded-lg p-10 mx-60 flex items-start shadow-lg">
-          <div className="w-48 h-48 bg-gray-300 border-2 border-gray-500 rounded-md overflow-hidden">
+        <div className="bg-gradient-to-br from-blue-100 to-cyan-50 rounded-lg p-10 mx-60 flex items-start shadow-lg">
+          <div className="w-80 h-80 bg-gray-300 border-2 border-gray-500 rounded-md overflow-hidden">
             <img
               src={selectedItem.attributes?.image?.data?.attributes?.url || "/default.jpg"}
               alt={selectedItem.attributes?.Label || "No image available"}
@@ -114,13 +117,19 @@ const Card = ({ params }) => {
             <p className="text-purple-600 text-xl">
               ฿{selectedItem.attributes?.Price || "Unknown Price"}
             </p>
+
+            {/* ✅ แสดงจำนวนคงเหลือของอุปกรณ์ */}
+            <p className="text-gray-700 mt-4">📦 จำนวนทั้งหมด: {totalItems} ชิ้น</p>
+            <p className="text-red-600">🛒 ถูกยืมไปแล้ว: {usedItems} ชิ้น</p>
+            <p className="text-green-600 font-semibold">✅ คงเหลือ: {remainingItems} ชิ้น</p>
+
             <div className="mt-4">
-              <p className="text-gray-700">จำนวน</p>
+              <p className="text-gray-700">จำนวนที่ต้องการยืม</p>
               <div className="flex items-center mt-2">
                 <button
                   onClick={decreaseQuantity}
                   className="px-3 py-1 bg-gray-300 rounded-l"
-                  disabled={isLoading}
+                  disabled={isLoading || quantity <= 1}
                 >
                   -
                 </button>
@@ -128,27 +137,31 @@ const Card = ({ params }) => {
                 <button
                   onClick={increaseQuantity}
                   className="px-3 py-1 bg-gray-300 rounded-r"
-                  disabled={isLoading}
+                  disabled={isLoading || quantity >= remainingItems}
                 >
                   +
                 </button>
               </div>
+              
               <div className="flex mt-4">
                 <button
                   className={`flex items-center px-4 py-2 bg-blue-500 text-white rounded mr-2 ${
-                    isLoading ? "opacity-50" : ""
+                    isLoading || quantity > remainingItems ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                   onClick={addToCart}
-                  disabled={isLoading}
+                  disabled={isLoading || quantity > remainingItems}
                 >
                   <TiShoppingCart className="mr-2" />
                   {isLoading ? "กำลังเพิ่ม..." : "เพิ่มไปยังรถเข็น"}
                 </button>
               </div>
+              
             </div>
+            
           </div>
+          
         </div>
-        <div className="bg-white rounded-lg p-10 mx-60 mt-6 shadow-lg">
+        <div className="bg-gradient-to-br from-blue-100 to-cyan-50 rounded-lg p-10 mx-60 mt-6 shadow-lg">
           <h2 className="text-xl font-bold mb-2">รายละเอียดเพิ่มเติม</h2>
           <p className="text-gray-700">
             {selectedItem.attributes?.Detail || "ไม่มีรายละเอียดเพิ่มเติม"}

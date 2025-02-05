@@ -75,19 +75,19 @@ export default function ApprovalPage() {
       if (response.ok) {
         const data = await response.json();
         console.log("Borrow Data:", data);
-  
+
         const formArray = data?.data?.attributes?.form?.data;
-  
+
         if (!formArray || formArray.length === 0) {
           alert("❌ ฟอร์มยังไม่ได้เชื่อมโยงกับไฟล์ PDF ในระบบ");
           return;
         }
-  
+
         const form = formArray[0]; // เข้าถึงข้อมูลใน form.data[0]
         const pdfUrl = form.attributes?.url;
-  
+
         console.log("Full PDF URL:", pdfUrl);
-  
+
         if (pdfUrl) {
           window.open(pdfUrl, "_blank");
         } else {
@@ -102,21 +102,21 @@ export default function ApprovalPage() {
       alert("❌ เกิดข้อผิดพลาดในการดึงฟอร์ม PDF");
     }
   };
-  
-  
-  
+
+
+
   const getStatusClass = (status) => {
     switch (status) {
       case "รอดำเนินการ":
-        return "bg-orange-200";
+        return "bg-blue-50";
       case "กำลังยืม":
-        return "bg-yellow-200";
+        return "bg-yellow-50";
       case "เลยกำหนด":
-        return "bg-red-200";
+        return "bg-red-100";
       case "คืนแล้ว":
-        return "bg-green-200";
+        return "bg-green-100";
       case "ถูกปฏิเสธ":
-        return "bg-gray-400";
+        return "bg-gray-200";
       default:
         return "";
     }
@@ -147,9 +147,9 @@ export default function ApprovalPage() {
   return (
     <div className="bg-gray-100 min-h-screen">
       <Headeradmin>
-        <div className="min-h-screen bg-gray-100 p-6">
+        <div className="min-h-screen  bg-gray-100 p-6">
           {/* Tab Navigation */}
-          <nav className="flex bg-blue-500 text-white  mb-6">
+          <nav className="flex  font-bold  text-lg bg-blue-100 text-gray-700  rounded-lg mb-6 h-14">
             {tabs.map((tab) => (
               <button
                 key={tab.status}
@@ -158,13 +158,15 @@ export default function ApprovalPage() {
                   setSearchTerm(""); // รีเซ็ตคำค้นหาเมื่อเปลี่ยนแท็บ
                   setCurrentPage(1); // รีเซ็ตหน้าเมื่อเปลี่ยนแท็บ
                 }}
-                className={`px-20 py-6 ${activeTab === tab.status ? "bg-blue-700" : "bg-blue-500"
-                  } hover:bg-blue-600 focus:outline-none transition`}
+                className={`px-20 py-6 h-full flex items-center justify-center
+        ${activeTab === tab.status ? "bg-blue-400" : "bg-blue-100"} 
+        hover:bg-blue-400 focus:outline-none transition rounded-lg`}
               >
                 {tab.label}
               </button>
             ))}
           </nav>
+
 
           {/* Search Bar */}
           <div className="mb-4">
@@ -173,44 +175,45 @@ export default function ApprovalPage() {
               placeholder="ค้นหาในส่วนนี้"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="border border-gray-300 rounded-md p-2 text-sm w-full"
+              className="border border-gray-300 rounded-md p-2  text-sm w-full"
             />
           </div>
 
           {/* Render Active Tab Content */}
           <section className="my-6 bg-white p-4 shadow-sm rounded-md">
-            <h2 className="text-lg font-bold mb-4">{activeTab}</h2>
-            <table className="w-full border-collapse border border-gray-200 text-sm table-fixed">
+            <h2 className="text-2xl font-bold mb-4">{activeTab}</h2>
+            <table className="w-full border-collapse  border border-gray-300  table-fixed">
               <thead>
-                <tr className="bg-gray-100 text-left ">
-                  <th className="border border-gray-200 px-28 text-center py-4 w-1/6">ชื่อผู้ยืม</th>
-                  <th className="border border-gray-200 px-28  text-center py-4 w-1/6">สิ่งของที่ยืม</th>
-                  <th className="border border-gray-200 px-28 text-center py-4 w-1/6">วันที่ยืม</th>
-                  <th className="border border-gray-200 px-28 text-center py-4 w-1/6">วันที่คืน</th>
-                  <th className="border border-gray-200 px-28 text-center py-4 w-1/6">สถานะ</th>
-                  <th className="border border-gray-200 px-28 text-center py-4 w-1/6">ดำเนินการ</th>
+                <tr className="bg-[#6EC7E2]  text-lg ">
+                  <th className="border border-gray-400 px-28 text-center py-4 w-1/4">ผู้ยืม</th>
+                  <th className="border border-gray-400 px-28  text-center py-4 w-1/4">รายการ</th>
+                  <th className="border border-gray-400 px-26 text-center py-4 w-1/6">วันที่ยืม</th>
+                  <th className="border border-gray-400 px-26 text-center py-4 w-1/6">กำหนดคืน</th>
+                  <th className="border border-gray-400 px-28 text-center py-4 w-1/4">สถานะ</th>
+                  <th className="border border-gray-400 px-28 text-center py-4 w-1/3">ดำเนินการ</th>
                 </tr>
               </thead>
               <tbody>
                 {currentItems.map((request) => (
                   <tr
                     key={request.id}
-                    className={`${getStatusClass(request.status)} hover:bg-gray-50 text-center border-t`}
+                    className={`${getStatusClass(request.status)} hover:bg-gray-200 text-center text-lg border-t`}
                   >
-                    <td className="border border-gray-200 px-4 py-2">{request.name}</td>
-                    <td className="border border-gray-200 px-4 py-2">{request.label}</td>
-                    <td className="border border-gray-200 px-4 py-2">
+                    <td className="border border-gray-300 px-4 py-2">{request.name}</td>
+                    <td className="border border-gray-300 px-4 py-2">{request.label}</td>
+                    
+                    <td className="border border-gray-300 px-4 py-2">
                       {new Date(request.borrowDate).toLocaleDateString("th-TH")}
                     </td>
-                    <td className="border border-gray-200 px-4 py-2">
+                    <td className="border border-gray-300 px-4 py-2">
                       {new Date(request.returnDate).toLocaleDateString("th-TH")}
                     </td>
-                    <td className="border border-gray-200 px-4 py-2">{request.status}</td>
-                    <td className="border border-gray-200 px-4 py-2 flex justify-center gap-2">
+                    <td className="border border-gray-300 px-4 py-2">{request.status}</td>
+                    <td className="border  border-gray-300  px-4 py-2 flex justify-center gap-2">
                       {activeTab === "รอดำเนินการ" && (
                         <>
                           <button
-                            className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
+                            className="bg-green-500 border-gray-300  text-white px-3 py-1 rounded-md hover:bg-green-600"
                             onClick={() => updateStatus(request.id, "กำลังยืม")}
                           >
                             อนุมัติ
@@ -221,6 +224,8 @@ export default function ApprovalPage() {
                           >
                             ปฏิเสธ
                           </button>
+
+                          
                         </>
                       )}
                       {activeTab === "กำลังยืม" && (
@@ -232,11 +237,24 @@ export default function ApprovalPage() {
                         </button>
                       )}
                       <button
-                        className="bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600"
+                        className="bg-blue-400 text-white px-3 py-1 rounded-md hover:bg-gray-600"
                         onClick={() => viewPDF(request.id)}
                       >
                         รายละเอียด
                       </button>
+
+                      {activeTab === "เลยกำหนด" && (
+                      <td className="border  ">
+                        <button
+                          className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
+                          onClick={() =>
+                            sendReminderEmail(request.email, request.name, request.label, request.returnDate)
+                          }
+                        >
+                          ส่งแจ้งเตือน
+                        </button>
+                      </td>
+                    )}
 
                     </td>
                   </tr>
@@ -248,21 +266,20 @@ export default function ApprovalPage() {
             <div className="flex justify-between items-center mt-4">
               <button
                 onClick={handlePreviousPage}
-                className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
+                className="bg-[#4691D3] w-28 h-12 text-white px-3 py-1 rounded-md hover:bg-blue-600 flex items-center justify-center"
                 disabled={currentPage === 1}
               >
-                ก่อนหน้า
+                ← ก่อนหน้า
               </button>
-              <span>
-                หน้า {currentPage} จาก {totalPages}
-              </span>
+
               <button
                 onClick={handleNextPage}
-                className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
+                className="bg-[#4691D3] w-28 h-12 text-white px-3 py-1 rounded-md hover:bg-blue-600 flex items-center justify-center"
                 disabled={currentPage === totalPages}
               >
-                ถัดไป
+                ถัดไป →
               </button>
+
             </div>
           </section>
         </div>

@@ -145,8 +145,22 @@ const EquipmentPage = () => {
       <Layout>
         <div className="container mx-auto mt-10">
           <h1 className="text-4xl font-bold text-center mb-10">อุปกรณ์ที่ยืม</h1>
-
-          <div className="bg-white shadow-lg rounded-lg p-6">
+          <div className="mt-6 flex flex-col  ">
+            <label className="text-lg font-semibold mb-2">เลือกปีการศึกษา</label>
+            <select
+              className="border p-2 rounded-md shadow-md"
+              value={academicYear}
+              onChange={(e) => setAcademicYear(e.target.value)}
+            >
+              <option value="">-- กรุณาเลือกปีการศึกษา --</option>
+              {academicYears.map((Year, index) => (
+                <option key={index} value={Year}>
+                  {Year}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="bg-white mt-6 shadow-lg rounded-lg p-6">
             <h2 className="text-2xl font-bold mb-6">รายการอุปกรณ์</h2>
             {userEquipmentItems.length === 0 ? (
               <div className="text-center text-gray-500 py-8">ไม่มีอุปกรณ์ที่ยืม</div>
@@ -197,21 +211,7 @@ const EquipmentPage = () => {
           </div>
 
           {/* ✅ เลือกปีการศึกษาก่อนพิมพ์แบบฟอร์ม */}
-          <div className="mt-6 flex flex-col items-center">
-            <label className="text-lg font-semibold mb-2">เลือกปีการศึกษา</label>
-            <select
-              className="border p-2 rounded-md shadow-md"
-              value={academicYear}
-              onChange={(e) => setAcademicYear(e.target.value)}
-            >
-              <option value="">-- กรุณาเลือกปีการศึกษา --</option>
-              {academicYears.map((Year, index) => (
-                <option key={index} value={Year}>
-                  {Year}
-                </option>
-              ))}
-            </select>
-          </div>
+          
 
           <button
             className="bg-blue-500 text-white py-2 px-6 mt-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-200"

@@ -8,7 +8,7 @@ import html2canvas from "html2canvas";
 const BorrowFormPage = () => {
   const [borrowData, setBorrowData] = useState([]);
   const [currentDate, setCurrentDate] = useState("");
-  const [academicYear, setAcademicYear] = useState(""); // ✅ เพิ่ม state สำหรับปีการศึกษา
+  const [academicYear, setAcademicYear] = useState("");
   const formRef = useRef();
 
   useEffect(() => {
@@ -16,7 +16,7 @@ const BorrowFormPage = () => {
     if (storedData) {
       const parsedData = JSON.parse(storedData);
       setBorrowData(parsedData);
-      setAcademicYear(parsedData[0]?.academicYear || ""); // ✅ ดึงปีการศึกษาจากข้อมูลยืม
+      setAcademicYear(parsedData[0]?.academicYear || "");
     }
 
     const today = new Date();
@@ -46,6 +46,14 @@ const BorrowFormPage = () => {
     }
   };
 
+  const downloadPDF = async () => {
+    const pdf = await generatePDF();
+    if (!pdf) return;
+
+    pdf.save("borrow-form.pdf"); // ดาวน์โหลดไฟล์ PDF
+  };
+  
+
   const handleSubmitForm = async () => {
     const pdf = await generatePDF();
     if (!pdf) return;
@@ -72,37 +80,68 @@ const BorrowFormPage = () => {
 
       console.log("✅ Uploaded File:", uploadedFile);
 
-      // ✅ สร้างข้อมูลการยืมใน Strapi (รวมฟิลด์ `year`)
-      const createBorrowPromises = borrowData.map((item) => {
-        return fetch("http://172.31.0.1:1337/api/borrows", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            data: {
-              name: item.name,
-              email: item.email,
-              label: item.label,
-              Price: item.Price,
-              amount: item.amount,
-              Borrowing_date: item.Borrowing_date,
-              Due: item.Due,
-              Year: academicYear, // ✅ เก็บปีการศึกษาใน Strapi
-              status: "รอดำเนินการ",
-              form: uploadedFile.id, // ผูกไฟล์ PDF กับข้อมูลการยืม
+      // ✅ สร้างข้อมูลการยืมใน Strapi และอัปเดตจำนวนอุปกรณ์
+      await Promise.all(
+        borrowData.map(async (item) => {
+          // ✅ บันทึกข้อมูลการยืม
+          const borrowResponse = await fetch("http://172.31.0.1:1337/api/borrows", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
             },
-          }),
-        });
-      });
+            body: JSON.stringify({
+              data: {
+                name: item.name,
+                email: item.email,
+                label: item.label,
+                Price: item.Price,
+                amount: item.amount,
+                Borrowing_date: item.Borrowing_date,
+                Due: item.Due,
+                Year: academicYear,
+                status: "รอดำเนินการ",
+                form: uploadedFile.id,
+              },
+            }),
+          });
+        
+          if (!borrowResponse.ok) {
+            throw new Error("Failed to create Borrow record in Strapi");
+          }
 
-      const results = await Promise.allSettled(createBorrowPromises);
-      const failedRequests = results.filter((res) => res.status === "rejected");
+          console.log(`✅ Borrow record created for ${item.label}`);
 
-      if (failedRequests.length > 0) {
-        console.error("❌ Failed Requests:", failedRequests);
-        throw new Error(`Failed to create ${failedRequests.length} Borrow records`);
-      }
+          // ✅ อัปเดตจำนวนคงเหลือของอุปกรณ์ใน `/api/cartadmins`
+          const inventoryResponse = await fetch(`http://172.31.0.1:1337/api/cartadmins?filters[Label][$eq]=${encodeURIComponent(item.label)}`);
+          const inventoryData = await inventoryResponse.json();
+
+          if (inventoryData.data.length === 0) {
+            console.error(`❌ ไม่พบอุปกรณ์: ${item.label} ในระบบ`);
+            return;
+          }
+          
+
+          const itemId = inventoryData.data[0].id;
+          const currentItem = inventoryData.data[0].attributes;
+          const newBorrowedAmount = (currentItem.Borrowed || 0) + item.amount;
+          const newRemainingAmount = (currentItem.item || 0) - newBorrowedAmount;
+
+          await fetch(`http://172.31.0.1:1337/api/cartadmins/${itemId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              data: {
+                Borrowed: newBorrowedAmount,
+                remaining: newRemainingAmount >= 0 ? newRemainingAmount : 0,
+              },
+            }),
+          });
+
+          console.log(`✅ Updated inventory for ${item.label}`);
+        })
+      );
 
       alert("✅ ส่งแบบฟอร์มสำเร็จ และข้อมูลการยืมถูกบันทึกใน Strapi!");
     } catch (error) {
@@ -119,7 +158,7 @@ const BorrowFormPage = () => {
             <h1 className="text-4xl font-bold">แบบฟอร์มการยืมอุปกรณ์</h1>
           </div>
 
-          <div className="bg-white shadow-lg rounded-lg p-6" ref={formRef}>
+          <div className="bg-white  shadow-lg rounded-lg p-6" ref={formRef}>
             {borrowData.length === 0 ? (
               <div className="text-center text-gray-500 py-8">ไม่มีข้อมูล</div>
             ) : (
@@ -135,7 +174,7 @@ const BorrowFormPage = () => {
                       <span className="font-bold">อีเมลผู้ยืม:</span> {borrowData[0]?.email || "N/A"}
                     </div>
                     <div className="p-4 border rounded-md bg-gray-50">
-                      <span className="font-bold">ปีการศึกษา:</span> {academicYear || "N/A"} {/* ✅ แสดงปีการศึกษา */}
+                      <span className="font-bold">ปีการศึกษา:</span> {academicYear || "N/A"}
                     </div>
                   </div>
                 </div>
@@ -158,24 +197,83 @@ const BorrowFormPage = () => {
                           <td className="border p-2">{index + 1}</td>
                           <td className="border p-2">{item.label}</td>
                           <td className="border p-2">{item.amount}</td>
-                          <td className="border p-2">
-                            {new Date(item.Borrowing_date).toLocaleDateString("th-TH")}
-                          </td>
-                          <td className="border p-2">
-                            {new Date(item.Due).toLocaleDateString("th-TH")}
-                          </td>
+                          <td className="border p-2">{new Date(item.Borrowing_date).toLocaleDateString("th-TH")}</td>
+                          <td className="border p-2">{new Date(item.Due).toLocaleDateString("th-TH")}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
+                <div>
+                  <label className="block text-sm font-medium">
+                    วัตถุประสงค์ของการใช้งานเพื่อ
+                  </label>
+                  <textarea
+                    rows="3"
+                    className="w-full mt-3 p-2 border border-gray-300 rounded-md"
+                  ></textarea>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm mt-3  font-medium">ลงชื่อผู้ยืม:</p>
+                    <input
+                      type="text"
+                      className="w-full mt-3 p-2 border border-gray-300 rounded-md"
+                    />
+                    <p className="mt-3 text-sm">วันที่ยืม:</p>
+                    <input
+
+                      className="w-full mt-3 p-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm mt-3 font-medium">ลงชื่อผู้คืน:</p>
+                    <input
+                      type="text"
+                      className="w-full mt-3 p-2 border border-gray-300 rounded-md"
+                    />
+                    <p className="mt-3 text-sm">วันที่คืน:</p>
+                    <input
+
+                      className="w-full mt-3 p-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                </div>
+
+                {/* Official Confirmation */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <p className="text-sm mt-3 font-medium">ลงชื่อเจ้าหน้าที่ (ตรวจสอบ):</p>
+                    <input
+                      type="text"
+                      className="w-full mt-3 p-2 border border-gray-300 rounded-md"
+                    />
+                    <p className="mt-3 text-sm">วันที่:</p>
+                    <input
+
+                      className="w-full mt-3 p-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm mt-3 font-medium">ลงชื่อเจ้าหน้าที่ (อนุมัติ):</p>
+                    <input
+                      type="text"
+                      className="w-full mt-3 p-2 border border-gray-300 rounded-md"
+                    />
+                    <p className="mt-3 text-sm">วันที่:</p>
+                    <input
+
+                      className="w-full mt-3 p-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                </div>
 
                 <div className="mt-6 flex justify-end">
-                  <button
-                    className="bg-blue-500 text-white px-6 py-2 rounded-md shadow-md hover:bg-blue-600"
-                    onClick={handleSubmitForm}
-                  >
+                  <button className="bg-blue-500 text-white px-8 mx-2 py-2 rounded-md shadow-md hover:bg-blue-600" onClick={handleSubmitForm}>
                     ส่งแบบฟอร์ม
+                  </button>
+                  <button className="bg-green-500 text-white px-6 py-2 rounded-md shadow-md hover:bg-green-600" onClick={downloadPDF}>
+                    ดาวน์โหลด PDF
                   </button>
                 </div>
               </>

@@ -1,13 +1,12 @@
 "use client";
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import Image from "next/image";
 import { FaBars, FaBell, FaSignOutAlt, FaThList, FaNewspaper, FaHome } from "react-icons/fa";
 import { SlGlobe } from "react-icons/sl";
 import { BsChatDotsFill } from "react-icons/bs";
-import { IoSearchCircleSharp, IoChatboxEllipsesSharp } from 'react-icons/io5';
 import { TiShoppingCart } from "react-icons/ti";
 import { CiBoxList } from "react-icons/ci";
-import { MdOutlinePostAdd } from "react-icons/md";
 import { GrContactInfo } from "react-icons/gr";
 import { RiFileListLine } from "react-icons/ri";
 import Logout from "@/components/Logout";
@@ -15,73 +14,106 @@ import Link from 'next/link';
 
 const MainHeader = ({ session }) => {
   const [menuVisible, setMenuVisible] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [overdueItems, setOverdueItems] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
 
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value);
-  };
+  useEffect(() => {
+    const fetchOverdueDevices = async () => {
+      if (!session?.user?.email) return;
+
+      try {
+        const response = await fetch(
+          `http://172.31.0.1:1337/api/borrows?filters[email][$eq]=${session.user.email}&filters[status][$eq]=เลยกำหนด&populate=*`
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("API Response:", data); // Debugging API response
+
+        const overdueList = data.data.map((item) => ({
+          id: item.id,
+          label: item.attributes.label,
+          dueDate: item.attributes.Due,
+        }));
+
+        console.log("Overdue Items:", overdueList); // Debugging parsed data
+
+        setOverdueItems(overdueList);
+        setNotificationCount(overdueList.length);
+      } catch (error) {
+        console.error("Error fetching overdue devices:", error);
+      }
+    };
+
+    fetchOverdueDevices();
+  }, [session?.user?.email]);
+
+  useEffect(() => {
+    setNotificationCount(overdueItems.length);
+  }, [overdueItems]);
 
   const toggleMenu = () => {
     setMenuVisible(!menuVisible);
   };
 
-  // Mock function to simulate search
-  const searchDevices = (term) => {
-    const devices = [
-      "Computer",
-      "Laptop",
-      "Mouse",
-      "Keyboard",
-      "Monitor",
-      "Printer",
-      "Scanner",
-
-      "Webcam",
-      "Headphones",
-    ];
-    return devices.filter(device => device.toLowerCase().includes(term.toLowerCase()));
+  const toggleDropdown = () => {
+    setShowDropdown(!showDropdown);
   };
 
-  useState(() => {
-    if (searchTerm) {
-      const results = searchDevices(searchTerm);
-      setSearchResults(results);
-    } else {
-      setSearchResults([]);
-    }
-  }, [searchTerm]);
-
   return (
-    <div className='bg-cyan-100 flex justify-between items-center px-6 p-4 mb-4'>
+    <div className='bg-gradient-to-br from-cyan-100 to-[#6EC7E2] flex justify-between items-center px-6 p-4 mb-4 relative'>
       <div>
-        <Image src="/logo/hw_web_logo.svg" width={200} height={60} alt="hw_web_logo" />
+        <Image src="/logo/hw_web_logo.svg" width={300} height={60} alt="hw_web_logo" priority />
       </div>
-      <div className='flex border p-3 rounded-lg bg-white h-10 items-center px-4'>
-        <input
-          type='text'
-          placeholder='Search devices...'
-          value={searchTerm}
-          onChange={handleSearch}
-          className='bg-transparent w-full outline-none text-gray-700'
-        />
-        <IoSearchCircleSharp className='h-9 w-8 text-gray-500' />
-      </div>
+
       <div className='flex px-5 p-2 items-center gap-6'>
-      <div>
-  <BsChatDotsFill
-    className='cursor-pointer h-6 w-7 text-gray-400'
-    onClick={() => window.open("https://line.me/ti/g2/7AziMh5yNWFA4IFRKflrd5g5vYJTAp2hFJXBaw?utm_source=invitation&utm_medium=link_copy&utm_campaign=default", "_blank")}
-  />
-</div>
+        <div>
+          <BsChatDotsFill
+            className='cursor-pointer h-6 w-7 text-gray-500'
+            onClick={() => window.open("https://line.me/ti/g2/7AziMh5yNWFA4IFRKflrd5g5vYJTAp2hFJXBaw?utm_source=invitation&utm_medium=link_copy&utm_campaign=default", "_blank")}
+          />
+        </div>
 
         <div>
-          <SlGlobe className='cursor-pointer h-6 w-7 text-gray-400' />
+          <SlGlobe className='cursor-pointer h-6 w-7 text-gray-500' />
         </div>
-        <div>
-          <FaBell className='cursor-pointer h-6 w-7 text-gray-400' />
+
+        {/* ไอคอนแจ้งเตือน + Badge แสดงตัวเลข */}
+        <div className='relative'>
+          <FaBell className='cursor-pointer h-6 w-7 text-gray-500' onClick={toggleDropdown} />
+          {notificationCount > 0 && (
+            <span className='absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-1'>
+              {notificationCount}
+            </span>
+          )}
+
+          {/* Dropdown รายการที่เลยกำหนด */}
+          {showDropdown && (
+            <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg z-50">
+              <div className="p-4 text-gray-800 font-semibold border-b">
+                รายการที่เลยกำหนด
+              </div>
+              {overdueItems.length > 0 ? (
+                <ul className="max-h-60 overflow-y-auto">
+                  {overdueItems.map((item) => (
+                    <li key={item.id} className="p-2 border-b text-sm">
+                      {item.label} - <span className="text-red-500">{new Date(item.dueDate).toLocaleDateString("th-TH")}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="p-4 text-center text-gray-500">ไม่มีรายการเลยกำหนด</div>
+              )}
+            </div>
+          )}
         </div>
-        <FaBars className='cursor-pointer h-6 w-7 text-gray-400 mb:hidden' onClick={toggleMenu} />
+
+        <FaBars className='cursor-pointer h-6 w-7 text-gray-500 mb:hidden' onClick={toggleMenu} />
+
         <div>
           {session ? (
             <Image
@@ -100,8 +132,8 @@ const MainHeader = ({ session }) => {
             </Link>
           )}
         </div>
-
       </div>
+
       {menuVisible && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={toggleMenu}></div>
       )}
@@ -123,12 +155,10 @@ const MainHeader = ({ session }) => {
             <CiBoxList className='mr-2' />
             <Link href="/rentalinfo">แสดงข้อมูลการยืม</Link>
           </li>
-        
           <li className='flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4'>
             <FaNewspaper className='mr-2' />
             <Link href="/webnew">ข่าวสารเว็บไซต์</Link>
           </li>
-
           <li className='flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4'>
             <GrContactInfo className='mr-2' />
             <Link href="/contact">ข้อมูลการติดต่อ</Link>
@@ -137,21 +167,12 @@ const MainHeader = ({ session }) => {
             <RiFileListLine className='mr-2 ' />
             <Link href="/agreement">ข้อตกลงการใช้งาน</Link>
           </li>
-          <li className='flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4 '>
+          <li className='flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4'>
             <FaSignOutAlt className='mr-2 ' />
             <Logout />
           </li>
         </ul>
       </div>
-      {searchResults.length > 0 && (
-        <div className='absolute top-16 left-0 right-0 bg-white shadow-lg p-4'>
-          <ul>
-            {searchResults.map((result, index) => (
-              <li key={index} className='p-2 border-b'>{result}</li>
-            ))}
-          </ul>
-        </div>
-      )}
     </div>
   );
 };
