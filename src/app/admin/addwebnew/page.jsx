@@ -14,7 +14,7 @@ const CommentPage = () => {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const response = await axios.get('http://172.19.224.1:1337/api/webnews?populate=*'); // Correct endpoint for fetching webnews
+        const response = await axios.get('http://172.31.0.1:1337/api/webnews?populate=*'); // Correct endpoint for fetching webnews
         setComments(response.data.data); // Store the fetched webnews items
       } catch (error) {
         console.error('Error fetching comments:', error);
@@ -46,7 +46,7 @@ const CommentPage = () => {
     }
 
     try {
-      const response = await axios.post('http://172.19.224.1:1337/api/webnews', formData, {
+      const response = await axios.post('http://172.31.0.1:1337/api/webnews', formData, {
         headers: {
           'Content-Type': 'multipart/form-data', // Set the correct headers for file upload
         },

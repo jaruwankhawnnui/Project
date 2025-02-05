@@ -13,7 +13,7 @@ const Contact = () => {
   // ฟังก์ชันสำหรับดึงข้อมูลการติดต่อจาก API สำหรับ ID 14
   const fetchContact = async () => {
     try {
-      const response = await axios.get("http://172.25.176.1:1337/api/addcontacts/14?populate=*");
+      const response = await axios.get("http://172.31.0.1:1337/api/addcontacts/14?populate=*");
       setContact(response.data.data); // ตั้งค่าข้อมูลที่ดึงมาจาก API
     } catch (error) {
       console.error("Error fetching contact:", error);

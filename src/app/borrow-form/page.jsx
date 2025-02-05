@@ -1,240 +1,190 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Layout from "@/components/Layout";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
-import { useSession } from "next-auth/react";
 
-export default function BorrowForm() {
-  const formRef = useRef();
-  const { data: session } = useSession();
-  const [borrowedItems, setBorrowedItems] = useState([]);
+const BorrowFormPage = () => {
+  const [borrowData, setBorrowData] = useState([]);
   const [currentDate, setCurrentDate] = useState("");
+  const [academicYear, setAcademicYear] = useState(""); // ✅ เพิ่ม state สำหรับปีการศึกษา
+  const formRef = useRef();
 
   useEffect(() => {
-    if (session?.user?.email) {
-      // Fetch data from /api/equipment for the logged-in user
-      fetch(
-        `http://172.29.80.1:1337/api/equipment?filters[email][$eq]=${session.user.email}`
-      )
-        .then((response) => response.json())
-        .then((data) => {
-          if (data && data.data) {
-            const formattedData = data.data.map((item) => ({
-              name: item.attributes.name,
-              label: item.attributes.label,
-              amount: item.attributes.amount,
-            }));
-            setBorrowedItems(formattedData);
-          } else {
-            setBorrowedItems([]);
-          }
-        })
-        .catch((error) => console.error("Error fetching equipment:", error));
+    const storedData = localStorage.getItem("borrowData");
+    if (storedData) {
+      const parsedData = JSON.parse(storedData);
+      setBorrowData(parsedData);
+      setAcademicYear(parsedData[0]?.academicYear || ""); // ✅ ดึงปีการศึกษาจากข้อมูลยืม
     }
 
     const today = new Date();
-    const formattedDate = today.toISOString().split("T")[0];
-    setCurrentDate(formattedDate);
-  }, [session]);
+    setCurrentDate(today.toISOString().split("T")[0]);
+  }, []);
 
-  const handleDownloadPDF = async () => {
-    const formElement = formRef.current;
+  const generatePDF = async () => {
+    if (!formRef.current) {
+      alert("❌ ไม่สามารถสร้าง PDF ได้");
+      return null;
+    }
 
     try {
-      const canvas = await html2canvas(formElement, { scale: 2 });
+      const canvas = await html2canvas(formRef.current, { scale: 1 });
       const imgData = canvas.toDataURL("image/png");
 
       const pdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-
       const imgHeight = (canvas.height * pdfWidth) / canvas.width;
 
-      let position = 0;
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, imgHeight);
+      return pdf;
+    } catch (error) {
+      console.error("❌ Error generating PDF:", error);
+      alert("❌ เกิดข้อผิดพลาดในการสร้าง PDF");
+      return null;
+    }
+  };
 
-      if (imgHeight <= pdfHeight) {
-        pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, imgHeight);
-      } else {
-        let pageHeightLeft = imgHeight;
+  const handleSubmitForm = async () => {
+    const pdf = await generatePDF();
+    if (!pdf) return;
 
-        while (pageHeightLeft > 0) {
-          pdf.addImage(imgData, "PNG", 0, position, pdfWidth, imgHeight);
-          pageHeightLeft -= pdfHeight;
-          position = -pageHeightLeft;
+    const pdfBlob = pdf.output("blob");
+    const formData = new FormData();
+    formData.append("files", pdfBlob, "borrow-form.pdf");
 
-          if (pageHeightLeft > 0) {
-            pdf.addPage();
-          }
-        }
+    try {
+      // ✅ อัปโหลด PDF ไปยัง Strapi
+      const uploadResponse = await fetch("http://172.31.0.1:1337/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        console.error("❌ Error uploading PDF:", errorText);
+        throw new Error("Failed to upload PDF to Strapi");
       }
 
-      pdf.save("borrow-form.pdf");
+      const uploadResult = await uploadResponse.json();
+      const uploadedFile = uploadResult[0];
+
+      console.log("✅ Uploaded File:", uploadedFile);
+
+      // ✅ สร้างข้อมูลการยืมใน Strapi (รวมฟิลด์ `year`)
+      const createBorrowPromises = borrowData.map((item) => {
+        return fetch("http://172.31.0.1:1337/api/borrows", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            data: {
+              name: item.name,
+              email: item.email,
+              label: item.label,
+              Price: item.Price,
+              amount: item.amount,
+              Borrowing_date: item.Borrowing_date,
+              Due: item.Due,
+              Year: academicYear, // ✅ เก็บปีการศึกษาใน Strapi
+              status: "รอดำเนินการ",
+              form: uploadedFile.id, // ผูกไฟล์ PDF กับข้อมูลการยืม
+            },
+          }),
+        });
+      });
+
+      const results = await Promise.allSettled(createBorrowPromises);
+      const failedRequests = results.filter((res) => res.status === "rejected");
+
+      if (failedRequests.length > 0) {
+        console.error("❌ Failed Requests:", failedRequests);
+        throw new Error(`Failed to create ${failedRequests.length} Borrow records`);
+      }
+
+      alert("✅ ส่งแบบฟอร์มสำเร็จ และข้อมูลการยืมถูกบันทึกใน Strapi!");
     } catch (error) {
-      console.error("Error generating PDF:", error);
-      alert("เกิดข้อผิดพลาดในการดาวน์โหลด PDF");
+      console.error("❌ Error submitting form:", error);
+      alert("❌ เกิดข้อผิดพลาดในการส่งแบบฟอร์ม");
     }
   };
 
   return (
     <div className="bg-gray-100 min-h-screen">
       <Layout>
-        <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-          <div
-            className="max-w-4xl w-full bg-white p-8 rounded-lg shadow-md"
-            ref={formRef}
-          >
-            <h1 className="text-2xl font-bold text-center mb-8">
-              แบบฟอร์มการขอยืมวัสดุ/อุปกรณ์
-            </h1>
-            <form className="space-y-4">
-              {/* วันที่ */}
-              <div className="space-y-4">
+        <div className="container mx-auto mt-10">
+          <div className="text-center mb-6">
+            <h1 className="text-4xl font-bold">แบบฟอร์มการยืมอุปกรณ์</h1>
+          </div>
+
+          <div className="bg-white shadow-lg rounded-lg p-6" ref={formRef}>
+            {borrowData.length === 0 ? (
+              <div className="text-center text-gray-500 py-8">ไม่มีข้อมูล</div>
+            ) : (
+              <>
+                <div className="border-b pb-4 mb-6">
+                  <p className="text-gray-600 mt-2">วันที่: {currentDate}</p>
+                  <h2 className="text-xl font-bold">ข้อมูลการยืม:</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div className="p-4 border rounded-md bg-gray-50">
+                      <span className="font-bold">ชื่อผู้ยืม:</span> {borrowData[0]?.name || "N/A"}
+                    </div>
+                    <div className="p-4 border rounded-md bg-gray-50">
+                      <span className="font-bold">อีเมลผู้ยืม:</span> {borrowData[0]?.email || "N/A"}
+                    </div>
+                    <div className="p-4 border rounded-md bg-gray-50">
+                      <span className="font-bold">ปีการศึกษา:</span> {academicYear || "N/A"} {/* ✅ แสดงปีการศึกษา */}
+                    </div>
+                  </div>
+                </div>
+
                 <div>
-                  <div className="border  rounded-md p-2 text-center text-s font-medium">
-                   วันที่  :   {currentDate}
-                 
-                  </div>
-                  
-                </div>
-
-                {/* ชื่อ-นามสกุล และ อีเมล */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <div className="border border-gray-300 rounded-md p-4 bg-gray-100 text-center text-s font-medium">
-                      ชื่อ-นามสกุล :  {session?.user?.name || ""}
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="border border-gray-300 rounded-md p-4 bg-gray-100 text-center text-s font-medium">
-                      อีเมล : {session?.user?.email || ""}
-                    </div>
-                  
-                  </div>
-                </div>
-              </div>
-
-              {/* รายการอุปกรณ์ */}
-              <div>
-                <p className="text-sm font-medium mb-2">
-                  มีความประสงค์จะขอยืมวัสดุ/อุปกรณ์ ดังรายการต่อไปนี้:
-                </p>
-                <table className="w-full mt-3 border border-gray-300 text-center">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-300 p-2">ลำดับ</th>
-                      <th className="border border-gray-300 p-2">ชื่ออุปกรณ์</th>
-                      <th className="border border-gray-300 p-2">จำนวน</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {borrowedItems.length > 0 ? (
-                      borrowedItems.map((item, index) => (
+                  <h2 className="text-xl font-bold mb-4">รายการอุปกรณ์ที่ยืม:</h2>
+                  <table className="w-full border border-gray-300 text-center">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="border p-2">ลำดับ</th>
+                        <th className="border p-2">ชื่ออุปกรณ์</th>
+                        <th className="border p-2">จำนวน</th>
+                        <th className="border p-2">วันที่ยืม</th>
+                        <th className="border p-2">กำหนดคืน</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {borrowData.map((item, index) => (
                         <tr key={index}>
-                          <td className="border border-gray-300 p-2">
-                            {index + 1}
+                          <td className="border p-2">{index + 1}</td>
+                          <td className="border p-2">{item.label}</td>
+                          <td className="border p-2">{item.amount}</td>
+                          <td className="border p-2">
+                            {new Date(item.Borrowing_date).toLocaleDateString("th-TH")}
                           </td>
-                          <td className="border border-gray-300 p-2">
-                            {item.label}
-                          </td>
-                          <td className="border border-gray-300 p-2">
-                            {item.amount}
+                          <td className="border p-2">
+                            {new Date(item.Due).toLocaleDateString("th-TH")}
                           </td>
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan="3"
-                          className="border border-gray-300 p-2 text-center text-gray-500"
-                        >
-                          ไม่มีข้อมูล
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
 
-              {/* วัตถุประสงค์ */}
-              <div>
-                <label className="block text-sm font-medium">
-                  วัตถุประสงค์ของการใช้งานเพื่อ
-                </label>
-                <textarea
-                  rows="3"
-                  className="w-full mt-3 p-2 border border-gray-300 rounded-md"
-                ></textarea>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm mt-3  font-medium">ลงชื่อผู้ยืม:</p>
-                  <input
-                    type="text"
-                    className="w-full mt-3 p-2 border border-gray-300 rounded-md"
-                  />
-                  <p className="mt-3 text-sm">วันที่ยืม:</p>
-                  <input
-                   
-                    className="w-full mt-3 p-2 border border-gray-300 rounded-md"
-                  />
+                <div className="mt-6 flex justify-end">
+                  <button
+                    className="bg-blue-500 text-white px-6 py-2 rounded-md shadow-md hover:bg-blue-600"
+                    onClick={handleSubmitForm}
+                  >
+                    ส่งแบบฟอร์ม
+                  </button>
                 </div>
-                <div>
-                  <p className="text-sm mt-3 font-medium">ลงชื่อผู้คืน:</p>
-                  <input
-                    type="text"
-                    className="w-full mt-3 p-2 border border-gray-300 rounded-md"
-                  />
-                  <p className="mt-3 text-sm">วันที่คืน:</p>
-                  <input
-                  
-                    className="w-full mt-3 p-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-              </div>
-
-              {/* Official Confirmation */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div>
-                  <p className="text-sm mt-3 font-medium">ลงชื่อเจ้าหน้าที่ (ตรวจสอบ):</p>
-                  <input
-                    type="text"
-                    className="w-full mt-3 p-2 border border-gray-300 rounded-md"
-                  />
-                  <p className="mt-3 text-sm">วันที่:</p>
-                  <input
-                   
-                    className="w-full mt-3 p-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-                <div>
-                  <p className="text-sm mt-3 font-medium">ลงชื่อเจ้าหน้าที่ (อนุมัติ):</p>
-                  <input
-                    type="text"
-                    className="w-full mt-3 p-2 border border-gray-300 rounded-md"
-                  />
-                  <p className="mt-3 text-sm">วันที่:</p>
-                  <input
-                   
-                    className="w-full mt-3 p-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-                </div>
-            </form>
-
-            <div className="mt-6 flex justify-end">
-              <button
-                className="bg-green-500 text-white px-6 py-2 rounded-md shadow-md hover:bg-green-600"
-                onClick={handleDownloadPDF}
-              >
-                ดาวน์โหลดเป็น PDF
-              </button>
-            </div>
+              </>
+            )}
           </div>
         </div>
       </Layout>
     </div>
   );
-}
+};
+
+export default BorrowFormPage;

@@ -186,7 +186,7 @@ export default function LoginForm2() {
                 <div className="flex flex-col col-span-3 text-center rounded-r-lg border px-6 bg-white">
                     <img src="/logo/hw_web_logo.svg" className="h-[5rem] w-4/5 md:w-fit mt-4 md:mt-auto m-auto mb-1 px-3" alt="Hw Web_Logo" />
                     <p className="mt-6 font-bold md:text-2xl text-4xl">สวัสดี!</p>
-                    <p className="mt-4 md:text-lg text-2xl md:px-4 px-3">ลงชื่อเข้าใช้ผ่าน PSU Passport หรือ Google เพื่อเริ่มต้นใช้งาน</p>
+                    <p className="mt-4 md:text-lg text-2xl md:px-4 px-3">ลงชื่อเข้าใช้ผ่าน PSU Passport เพื่อเริ่มต้นใช้งาน</p>
 
                     {/* PSU Passport Login Button */}
                     <button
@@ -226,7 +226,8 @@ export default function LoginForm2() {
                         window.location.href = "http://localhost:3000/admin/loginadmin";
                     }}
                     >
-                    Sign in
+                        
+                   Log in with administrator
                     </button>
 
                     <div className="md:hidden m-auto md:col-span-4 rounded-l-lg">

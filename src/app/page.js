@@ -22,7 +22,7 @@ import Link from 'next/link';
 
 export default async function Home() {
   // Fetch the data from Strapi API
-  const res = await fetch('http://172.29.80.1:1337/api/webnews?populate=*', {
+  const res = await fetch('http://172.31.0.1:1337/api/webnews?populate=*', {
     cache: 'no-store',
   });
   const data = await res.json();

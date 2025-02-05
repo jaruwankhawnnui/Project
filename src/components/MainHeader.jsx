@@ -123,10 +123,7 @@ const MainHeader = ({ session }) => {
             <CiBoxList className='mr-2' />
             <Link href="/rentalinfo">แสดงข้อมูลการยืม</Link>
           </li>
-          <li className='flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4'>
-            <MdOutlinePostAdd className='mr-2' />
-            <Link href="/comment">Comment</Link>
-          </li>
+        
           <li className='flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4'>
             <FaNewspaper className='mr-2' />
             <Link href="/webnew">ข่าวสารเว็บไซต์</Link>

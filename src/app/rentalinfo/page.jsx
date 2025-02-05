@@ -15,7 +15,7 @@ const RentalInfo = () => {
 
       try {
         const response = await fetch(
-          `http://172.29.80.1:1337/api/borrows?filters[email][$eq]=${session.user.email}&populate=*`
+          `http://172.31.0.1:1337/api/borrows?filters[email][$eq]=${session.user.email}&populate=*`
         );
 
         if (response.ok) {
@@ -43,40 +43,15 @@ const RentalInfo = () => {
 
   const updateStatusInBorrow = async (id, status) => {
     try {
-      const response = await fetch(`http://172.29.80.1:1337/api/borrows/${id}`, {
+      await fetch(`http://172.31.0.1:1337/api/borrows/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ data: { status } }),
       });
-
-      if (response.ok) {
-        console.log(`Status for item ${id} updated to: ${status}`);
-      } else {
-        console.error(`Failed to update status for item ${id}:`, await response.text());
-      }
     } catch (error) {
       console.error("Error updating status in /api/borrows:", error);
-    }
-  };
-
-  const handleCancelItem = async (id) => {
-    try {
-      const response = await fetch(`http://172.29.80.1:1337/api/borrows/${id}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        setRentalItems(rentalItems.filter((item) => item.id !== id));
-        alert("ยกเลิกการยืมสำเร็จ");
-      } else {
-        console.error("Failed to cancel item:", await response.text());
-        alert("เกิดข้อผิดพลาดในการยกเลิก");
-      }
-    } catch (error) {
-      console.error("Error canceling item:", error);
-      alert("เกิดข้อผิดพลาดในการยกเลิก");
     }
   };
 
@@ -84,7 +59,7 @@ const RentalInfo = () => {
     const now = new Date();
     if (status === "กำลังยืม") return "bg-yellow-200";
     if (status === "ถูกปฏิเสธ") return "bg-gray-200";
-    if (status === "คืนแล้ว") return "bg-green-200"; // Rejected status
+    if (status === "คืนแล้ว") return "bg-green-200";
     if (new Date(dueDate) < now) return "bg-red-200";
     return "";
   };
@@ -92,14 +67,13 @@ const RentalInfo = () => {
   const getStatusText = (status, dueDate) => {
     const now = new Date();
     if (status === "กำลังยืม") return "กำลังยืม";
-    if (status === "ถูกปฏิเสธ") return "ถูกปฏิเสธ"; 
-    if (status === "คืนแล้ว") return "คืนแล้ว"; // Rejected status
+    if (status === "ถูกปฏิเสธ") return "ถูกปฏิเสธ";
+    if (status === "คืนแล้ว") return "คืนแล้ว";
     if (new Date(dueDate) < now) return "เลยกำหนด";
     return "N/A";
   };
 
   useEffect(() => {
-    // Update status in /api/borrows based on due dates
     rentalItems.forEach((item) => {
       const now = new Date();
       if (new Date(item.dueDate) < now && item.status !== "เลยกำหนด") {
@@ -109,6 +83,21 @@ const RentalInfo = () => {
       }
     });
   }, [rentalItems]);
+
+  // Sorting rental items by status
+  const sortedRentalItems = rentalItems.sort((a, b) => {
+    const statusOrder = {
+      "เลยกำหนด": 1,
+      "กำลังยืม": 2,
+      "คืนแล้ว": 3,
+      "ถูกปฏิเสธ": 4,
+    };
+
+    const statusA = getStatusText(a.status, a.dueDate);
+    const statusB = getStatusText(b.status, b.dueDate);
+
+    return statusOrder[statusA] - statusOrder[statusB];
+  });
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -125,13 +114,12 @@ const RentalInfo = () => {
               <div>วันที่ยืม</div>
               <div>กำหนดคืน</div>
               <div>สถานะ</div>
-             
             </div>
 
-            {rentalItems.length === 0 ? (
+            {sortedRentalItems.length === 0 ? (
               <div className="text-center text-gray-500 py-8">ไม่มีข้อมูลการยืม</div>
             ) : (
-              rentalItems.map((item, index) => (
+              sortedRentalItems.map((item, index) => (
                 <div
                   key={index}
                   className={`grid grid-cols-7 gap-4 items-center py-4 px-4 mb-4 rounded-lg shadow ${getStatusClass(
@@ -155,9 +143,6 @@ const RentalInfo = () => {
                   </div>
                   <div className="text-center font-semibold">
                     {getStatusText(item.status, item.dueDate)}
-                  </div>
-                  <div className="text-center">
-                   
                   </div>
                 </div>
               ))
