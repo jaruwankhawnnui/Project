@@ -75,7 +75,7 @@ const CommentPage = () => {
           <form onSubmit={handleCommentSubmit} className="mb-4">
             {/* Image Upload Field */}
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2">Upload Image</label>
+              <label className="block text-gray-700 text-sm font-bold mb-2">อัปโหลดรูปภาพ</label>
               <label
                 htmlFor="image-upload"
                 className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50"
@@ -97,7 +97,7 @@ const CommentPage = () => {
                     ></path>
                   </svg>
                   <p className="mb-2 text-sm text-gray-500">
-                    <span className="font-semibold">Upload Image</span>
+                    <span className="font-semibold">แนบรูปภาพ</span>
                   </p>
                 </div>
                 <input
@@ -112,24 +112,27 @@ const CommentPage = () => {
 
             {/* Label Input Field */}
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2">News-title</label>
+              <label className="block text-gray-700 text-sm font-bold mb-2">หัวข้อข่าวสาร</label>
               <input
                 type="text"
                 value={label}
                 onChange={handleLabelChange}
                 className="w-full p-2 border border-gray-300 rounded-lg"
-                placeholder="Enter the label"
+                placeholder="กรอกหัวข้อข่าวสาร"
                 required
               />
             </div>
 
-            <button
-              type="submit"
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-              disabled={loading}
-            >
-              {loading ? 'กำลังส่ง...' : 'Create'}
-            </button>
+            <div className='flex justify-center'>
+              <button
+                type="submit"
+                className="bg-[#465B7E] w-3/5 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                disabled={loading}
+              >
+                {loading ? 'กำลังส่ง...' : 'เพิ่ม'}
+              </button>
+
+            </div>
           </form>
         </div>
       </Headeradmin>

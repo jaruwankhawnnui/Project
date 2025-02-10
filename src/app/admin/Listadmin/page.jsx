@@ -3,6 +3,9 @@ import React, { useState, useEffect } from "react";
 import Headeradmin from "@/components/Headeradmin";
 import axios from "axios";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEdit } from "@fortawesome/free-solid-svg-icons";
+
 const InventoryList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [items, setItems] = useState([]);
@@ -111,69 +114,74 @@ const InventoryList = () => {
     <div className="bg-gray-100 min-h-screen">
       <Headeradmin>
         <div className="p-8">
-          <div className="flex justify-between items-center bg-white mb-4 mx-20">
-            <h1 className="mt-4 shadow-lg h-28 w-full text-3xl pl-10 font-bold">
+          <div className="flex justify-center  items-center bg-[#465B7E] p-5 rounded-lg">
+            <h1 className="w-full text-white text-3xl pl-10 font-bold">
               รายการอุปกรณ์
             </h1>
           </div>
-         
 
-          <div className="bg-white shadow-md mt-5 rounded-lg mx-20 p-4">
-            <div className="flex items-center mb-4">
+
+          <div className="bg-white shadow-md mt-5 rounded-lg mx-auto p-4">
+            <div className="mb-4 flex justify-end flex-wrap">
               <input
                 type="text"
                 placeholder="Search"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 border rounded shadow-sm focus:outline-none focus:shadow-outline"
+                className="px-4 py-2 border rounded shadow-sm focus:outline-none focus:shadow-outline text-sm 
+      w-full sm:w-1/2 md:w-1/3 lg:w-1/4 border-gray-500 max-w-sm"
               />
             </div>
+
 
             {loading ? (
               <div>Loading...</div>
             ) : (
-              <table className="mx-10 bg-white">
-                <thead>
-                  <tr>
-                    <th className="px-10 py-2 border-b">รูปภาพ</th>
-                    <th className="px-20 py-2 border-b">รายการ</th>
-                    <th className="px-10 py-2 border-b">จำนวนทั้งหมด</th>
-                    <th className="px-10 py-2 border-b">จำนวนยืม</th>
-                    <th className="px-10 py-2 border-b">คงเหลือ</th>
-                    <th className="px-20 py-2 border-b"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredItems.map((item) => (
-                    <tr key={item.id}>
-                      <td className="px-5 py-4 border-b">
-                        {item.image && (
-                          <img
-                            src={
-                              item.image.startsWith("http")
-                                ? item.image
-                                : `http://172.31.0.1:1337${item.image}`
-                            }
-                            className="w-32 h-32 object-cover rounded"
-                          />
-                        )}
-                      </td>
-                      <td className="px-10 py-2 border-b">{item.name}</td>
-                      <td className="px-20 py-2 border-b">{item.item} ชิ้น</td>
-                      <td className="px-20 py-2 border-b">{item.used} ชิ้น</td>
-                      <td className="px-20 py-2 border-b">{item.remaining} ชิ้น</td>
-                      <td className="px-4 py-2 border-b text-right">
-                        <button
-                          className="text-gray-500 hover:text-gray-700"
-                          onClick={() => openEditModal(item)}
-                        >
-                          ...
-                        </button>
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full bg-white border-collapse min-w-max">
+                  <thead className="bg-[#6EC7E2]">
+                    <tr>
+                      <th className="px-4 py-2 border-b text-center text-white">รูปภาพ</th>
+                      <th className="px-6 py-2 border-b text-center text-white">รายการ</th>
+                      <th className="px-4 py-2 border-b text-center hidden md:table-cell text-white">จำนวนทั้งหมด</th>
+                      <th className="px-4 py-2 border-b text-center text-white">จำนวนยืม</th>
+                      <th className="px-4 py-2 border-b text-center text-white">คงเหลือ</th>
+                      <th className="px-6 py-2 border-b text-center text-white"></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {filteredItems.map((item) => (
+                      <tr key={item.id} className="hover:bg-gray-100">
+                        <td className="px-4 py-2 border-b flex justify-center">
+                          {item.image && (
+                            <img
+                              src={
+                                item.image.startsWith("http")
+                                  ? item.image
+                                  : `http://172.31.0.1:1337${item.image}`
+                              }
+                              className="w-20 h-20 sm:w-32 sm:h-32 object-cover rounded"
+                            />
+                          )}
+                        </td>
+                        <td className="px-6 py-2 border-b text-center">{item.name}</td>
+                        <td className="px-4 py-2 border-b hidden md:table-cell text-center">{item.item} ชิ้น</td>
+                        <td className="px-4 py-2 border-b text-center">{item.used} ชิ้น</td>
+                        <td className="px-4 py-2 border-b text-center">{item.remaining} ชิ้น</td>
+                        <td className="px-6 py-2 border-b text-center">
+                          <button
+                            onClick={() => openEditModal(item)}
+                            className="text-gray-500 hover:text-gray-700 px-4 py-4 w-fit"
+                          >
+                            <FontAwesomeIcon icon={faEdit} className="w-5 h-5" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
             )}
           </div>
         </div>

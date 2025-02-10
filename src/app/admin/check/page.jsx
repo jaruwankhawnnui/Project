@@ -108,15 +108,15 @@ export default function ApprovalPage() {
   const getStatusClass = (status) => {
     switch (status) {
       case "รอดำเนินการ":
-        return "bg-blue-50";
-      case "กำลังยืม":
-        return "bg-yellow-50";
-      case "เลยกำหนด":
-        return "bg-red-100";
-      case "คืนแล้ว":
-        return "bg-green-100";
-      case "ถูกปฏิเสธ":
-        return "bg-gray-200";
+        return "bg-[#FAF9F3]";
+      case "รายการกำลังยืม":
+        return "bg-[#FAF9F3]";
+      case "รายการเกินกำหนดคืน":
+        return "bg-[#FAF9F3]";
+      case "รายการคืนสำเร็จ":
+        return "bg-[#FAF9F3]";
+      case "รายการถูกปฏิเสธ":
+        return "bg-[#FAF9F3]";
       default:
         return "";
     }
@@ -124,10 +124,10 @@ export default function ApprovalPage() {
 
   const tabs = [
     { label: "รอดำเนินการ", status: "รอดำเนินการ" },
-    { label: "รายการกำลังยืม", status: "กำลังยืม" },
-    { label: "รายการที่เลยกำหนด", status: "เลยกำหนด" },
-    { label: "รายการที่คืนแล้ว", status: "คืนแล้ว" },
-    { label: "รายการที่ถูกปฏิเสธ", status: "ถูกปฏิเสธ" },
+    { label: "รายการกำลังยืม", status: "รายการกำลังยืม" },
+    { label: "รายการเกินกำหนดคืน", status: "รายการเกินกำหนดคืน" },
+    { label: "รายการคืนสำเร็จ", status: "รายการคืนสำเร็จ" },
+    { label: "รายการถูกปฏิเสธ", status: "รายการถูกปฏิเสธ" },
   ];
 
   // Pagination Logic
@@ -149,7 +149,7 @@ export default function ApprovalPage() {
       <Headeradmin>
         <div className="min-h-screen  bg-gray-100 p-6">
           {/* Tab Navigation */}
-          <nav className="flex  font-bold  text-lg bg-blue-100 text-gray-700  rounded-lg mb-6 h-14">
+          <nav className="flex font-medium  text-md bg-[#AAC5D6] text-gray-700  rounded-lg mb-6 h-10">
             {tabs.map((tab) => (
               <button
                 key={tab.status}
@@ -158,9 +158,9 @@ export default function ApprovalPage() {
                   setSearchTerm(""); // รีเซ็ตคำค้นหาเมื่อเปลี่ยนแท็บ
                   setCurrentPage(1); // รีเซ็ตหน้าเมื่อเปลี่ยนแท็บ
                 }}
-                className={`px-20 py-6 h-full flex items-center justify-center
-        ${activeTab === tab.status ? "bg-blue-400" : "bg-blue-100"} 
-        hover:bg-blue-400 focus:outline-none transition rounded-lg`}
+                className={`h-full flex items-center justify-center text-white
+        ${activeTab === tab.status ? "bg-[#465B7E]" : "bg-[#AAC5D6]"} 
+        hover:bg-gray-400 focus:outline-none transition rounded-lg w-1/5`}
               >
                 {tab.label}
               </button>
@@ -169,115 +169,129 @@ export default function ApprovalPage() {
 
 
           {/* Search Bar */}
-          <div className="mb-4">
+          <div className="mb-4 flex justify-end">
             <input
               type="text"
-              placeholder="ค้นหาในส่วนนี้"
+              placeholder="ค้นหาอุปกรณ์"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="border border-gray-300 rounded-md p-2  text-sm w-full"
+              className="px-4 py-2 border rounded shadow-sm focus:outline-none focus:shadow-outline text-sm 
+      w-full sm:w-1/2 md:w-1/3 lg:w-1/4 border-gray-500 max-w-sm"
             />
           </div>
 
           {/* Render Active Tab Content */}
-          <section className="my-6 bg-white p-4 shadow-sm rounded-md">
+          <section className="my-6 bg-white p-4 shadow-sm rounded-md min-h-80 flex flex-col">
             <h2 className="text-2xl font-bold mb-4">{activeTab}</h2>
-            <table className="w-full border-collapse  border border-gray-300  table-fixed">
-              <thead>
-                <tr className="bg-[#6EC7E2]  text-lg ">
-                  <th className="border border-gray-400 px-28 text-center py-4 w-1/4">ผู้ยืม</th>
-                  <th className="border border-gray-400 px-28  text-center py-4 w-1/4">รายการ</th>
-                  <th className="border border-gray-400 px-26 text-center py-4 w-1/6">วันที่ยืม</th>
-                  <th className="border border-gray-400 px-26 text-center py-4 w-1/6">กำหนดคืน</th>
-                  <th className="border border-gray-400 px-28 text-center py-4 w-1/4">สถานะ</th>
-                  <th className="border border-gray-400 px-28 text-center py-4 w-1/3">ดำเนินการ</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentItems.map((request) => (
-                  <tr
-                    key={request.id}
-                    className={`${getStatusClass(request.status)} hover:bg-gray-200 text-center text-lg border-t`}
-                  >
-                    <td className="border border-gray-300 px-4 py-2">{request.name}</td>
-                    <td className="border border-gray-300 px-4 py-2">{request.label}</td>
-                    
-                    <td className="border border-gray-300 px-4 py-2">
-                      {new Date(request.borrowDate).toLocaleDateString("th-TH")}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      {new Date(request.returnDate).toLocaleDateString("th-TH")}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">{request.status}</td>
-                    <td className="border  border-gray-300  px-4 py-2 flex justify-center gap-2">
-                      {activeTab === "รอดำเนินการ" && (
-                        <>
-                          <button
-                            className="bg-green-500 border-gray-300  text-white px-3 py-1 rounded-md hover:bg-green-600"
-                            onClick={() => updateStatus(request.id, "กำลังยืม")}
-                          >
-                            อนุมัติ
-                          </button>
-                          <button
-                            className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
-                            onClick={() => updateStatus(request.id, "ถูกปฏิเสธ")}
-                          >
-                            ปฏิเสธ
-                          </button>
-
-                          
-                        </>
-                      )}
-                      {activeTab === "กำลังยืม" && (
-                        <button
-                          className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
-                          onClick={() => updateStatus(request.id, "คืนแล้ว")}
-                        >
-                          คืนแล้ว
-                        </button>
-                      )}
-                      <button
-                        className="bg-blue-400 text-white px-3 py-1 rounded-md hover:bg-gray-600"
-                        onClick={() => viewPDF(request.id)}
-                      >
-                        รายละเอียด
-                      </button>
-
-                      {activeTab === "เลยกำหนด" && (
-                      <td className="border  ">
-                        <button
-                          className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
-                          onClick={() =>
-                            sendReminderEmail(request.email, request.name, request.label, request.returnDate)
-                          }
-                        >
-                          ส่งแจ้งเตือน
-                        </button>
-                      </td>
-                    )}
-
-                    </td>
+            <div className="flex-grow mb-5">
+              <table className="w-full border-collapse  border border-gray-300  table-fixed">
+                <thead>
+                  <tr className="bg-[#4691D3] text-white text-md ">
+                    <th className="border border-gray-400 px-1 text-center py-1 w-1/4 font-medium">ชื่อผู้ยืม</th>
+                    <th className="border border-gray-400 px-1 text-center py-2 w-1/4 font-medium">รายการ</th>
+                    <th className="border border-gray-400 px-1 text-center py-2 w-1/6 font-medium">วันที่ยืม</th>
+                    <th className="border border-gray-400 px-1 text-center py-2 w-1/6 font-medium">กำหนดคืน</th>
+                    <th className="border border-gray-400 px-1 text-center py-2 w-1/4 font-medium">สถานะ</th>
+                    <th className="border border-gray-400 px-1 text-center py-2 w-1/3 font-medium">ดำเนินการ</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {currentItems && currentItems.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="text-center border border-gray-300 px-4 py-2">
+                        ไม่มีข้อมูล
+                      </td>
+                    </tr>
+                  ) :
+                    (
+                      currentItems.map((request) => (
+                        <tr
+                          key={request.id}
+                          className={`${getStatusClass(request.status)} hover:bg-gray-200 text-center text-md border-t`}
+                        >
+                          <td className="border border-gray-300 px-4 py-2">{request.name}</td>
+                          <td className="border border-gray-300 px-4 py-2">{request.label}</td>
+
+                          <td className="border border-gray-300 px-4 py-2">
+                            {new Date(request.borrowDate).toLocaleDateString("th-TH")}
+                          </td>
+                          <td className="border border-gray-300 px-4 py-2">
+                            {new Date(request.returnDate).toLocaleDateString("th-TH")}
+                          </td>
+                          <td className="border border-gray-300 px-4 py-2">{request.status}</td>
+                          <td className="border  border-gray-300  px-4 py-2 flex justify-center gap-2">
+                            {activeTab === "รอดำเนินการ" && (
+                              <>
+                                <button
+                                  className="bg-green-600 border-gray-300  text-white px-3 py-1 text-sm rounded-md hover:bg-green-600"
+                                  onClick={() => updateStatus(request.id, "รายการกำลังยืม")}
+                                >
+                                  อนุมัติ
+                                </button>
+                                <button
+                                  className="bg-red-600 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600"
+                                  onClick={() => updateStatus(request.id, "รายการถูกปฏิเสธ")}
+                                >
+                                  ปฏิเสธ
+                                </button>
+
+
+                              </>
+                            )}
+                            {activeTab === "รายการกำลังยืม" && (
+                              <button
+                                className="bg-[#225EC5] text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600"
+                                onClick={() => updateStatus(request.id, "รายการคืนสำเร็จ")}
+                              >
+                                คืนสำเร็จ
+                              </button>
+                            )}
+                            <button
+                              className="bg-gray-500 text-white px-3 py-1 rounded-md text-sm hover:bg-gray-600"
+                              onClick={() => viewPDF(request.id)}
+                            >
+                              รายละเอียด
+                            </button>
+
+                            {activeTab === "รายการเกินกำหนดคืน" && (
+                              <td className="border  ">
+                                <button
+                                  className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
+                                  onClick={() =>
+                                    sendReminderEmail(request.email, request.name, request.label, request.returnDate)
+                                  }
+                                >
+                                  ส่งแจ้งเตือน
+                                </button>
+                              </td>
+                            )}
+
+                          </td>
+                        </tr>
+                      ))
+                    )
+                  }
+
+                </tbody>
+              </table>
+            </div>
 
             {/* Pagination Controls */}
-            <div className="flex justify-between items-center mt-4">
+            <div className="flex justify-between items-end mt-auto">
               <button
                 onClick={handlePreviousPage}
-                className="bg-[#4691D3] w-28 h-12 text-white px-3 py-1 rounded-md hover:bg-blue-600 flex items-center justify-center"
+                className="bg-[#465B7E] text-white min-w-20 px-3 py-2 text-sm rounded-md hover:bg-blue-600 flex items-center justify-center"
                 disabled={currentPage === 1}
               >
-                ← ก่อนหน้า
+                ก่อนหน้า
               </button>
 
               <button
                 onClick={handleNextPage}
-                className="bg-[#4691D3] w-28 h-12 text-white px-3 py-1 rounded-md hover:bg-blue-600 flex items-center justify-center"
+                className="bg-[#465B7E] text-white min-w-20 px-3 py-2 text-sm rounded-md hover:bg-blue-600 flex items-center justify-center"
                 disabled={currentPage === totalPages}
               >
-                ถัดไป →
+                ถัดไป
               </button>
 
             </div>

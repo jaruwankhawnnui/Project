@@ -62,17 +62,19 @@ const CreateAcademicYear = ({ onNewYearAdded }) => {
                 value={Year}
                 onChange={handleInputChange}
                 className="w-full p-2 border rounded-md"
-                placeholder="เช่น 2567"
+                placeholder="เช่น 1/2567"
               />
             </div>
             {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-700"
-              disabled={isLoading}
-            >
-              {isLoading ? 'กำลังบันทึก...' : 'สร้างปีการศึกษา'}
-            </button>
+            <div className='flex justify-center'>
+              <button
+                type="submit"
+                className="w-3/5 bg-[#465B7E] text-white py-2 rounded-md hover:bg-blue-700"
+                disabled={isLoading}
+              >
+                {isLoading ? 'กำลังบันทึก...' : 'เพิ่ม'}
+              </button>
+            </div>
           </form>
         </div>
       </Headeradmin>

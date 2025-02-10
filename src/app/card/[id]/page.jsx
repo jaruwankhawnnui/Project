@@ -93,13 +93,13 @@ const Card = ({ params }) => {
   }
 
   const totalItems = selectedItem.attributes?.item || 0;
-  const usedItems = selectedItem.attributes?.Borrowed|| 0;
+  const usedItems = selectedItem.attributes?.Borrowed || 0;
   const remainingItems = totalItems - usedItems >= 0 ? totalItems - usedItems : 0; // ✅ ป้องกันค่าติดลบ
 
   return (
     <div className="bg-gray-100 flex flex-col min-h-screen">
       <Layout>
-        <div className="bg-gradient-to-br from-blue-100 to-cyan-50 rounded-lg p-10 mx-60 flex items-start shadow-lg">
+        <div className="bg-cyan-50 rounded-lg p-10 mx-60 flex items-start shadow-lg">
           <div className="w-80 h-80 bg-gray-300 border-2 border-gray-500 rounded-md overflow-hidden">
             <img
               src={selectedItem.attributes?.image?.data?.attributes?.url || "/default.jpg"}
@@ -112,7 +112,7 @@ const Card = ({ params }) => {
               {selectedItem.attributes?.Label || "Unknown Item"}
             </h2>
             <p className="text-gray-500">
-              {selectedItem.attributes?.Category || "Unknown Category"}
+              {selectedItem.attributes.categoriesadmin.data?.attributes?.name || "Unknown Category"}
             </p>
             <p className="text-purple-600 text-xl">
               ฿{selectedItem.attributes?.Price || "Unknown Price"}
@@ -142,12 +142,11 @@ const Card = ({ params }) => {
                   +
                 </button>
               </div>
-              
+
               <div className="flex mt-4">
                 <button
-                  className={`flex items-center px-4 py-2 bg-blue-500 text-white rounded mr-2 ${
-                    isLoading || quantity > remainingItems ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  className={`flex items-center px-4 py-2 bg-blue-500 text-white rounded mr-2 ${isLoading || quantity > remainingItems ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   onClick={addToCart}
                   disabled={isLoading || quantity > remainingItems}
                 >
@@ -155,13 +154,13 @@ const Card = ({ params }) => {
                   {isLoading ? "กำลังเพิ่ม..." : "เพิ่มไปยังรถเข็น"}
                 </button>
               </div>
-              
+
             </div>
-            
+
           </div>
-          
+
         </div>
-        <div className="bg-gradient-to-br from-blue-100 to-cyan-50 rounded-lg p-10 mx-60 mt-6 shadow-lg">
+        <div className="bg-cyan-50 rounded-lg p-10 mx-60 mt-6 shadow-lg">
           <h2 className="text-xl font-bold mb-2">รายละเอียดเพิ่มเติม</h2>
           <p className="text-gray-700">
             {selectedItem.attributes?.Detail || "ไม่มีรายละเอียดเพิ่มเติม"}

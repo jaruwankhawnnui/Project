@@ -26,7 +26,7 @@ const RentalInfo = () => {
             quantity: item.attributes.amount,
             borrowingDate: item.attributes.Borrowing_date,
             dueDate: item.attributes.Due,
-            status: item.attributes.status || "รอดำเนินการ", // กำหนดค่าเริ่มต้นเป็นรอดำเนินการ
+            status: item.attributes.status || "รอดำเนินการ", 
           }));
           setRentalItems(items);
         } else {
@@ -67,7 +67,7 @@ const RentalInfo = () => {
     });
   }, [rentalItems]);
 
-  // ลำดับความสำคัญของสถานะจากมากไปน้อย
+ 
   const statusOrder = {
     "เลยกำหนด": 1,
     "กำลังยืม": 2,
@@ -75,7 +75,6 @@ const RentalInfo = () => {
     "รอดำเนินการ": 4,
   };
 
-  // เรียงลำดับรายการเช่าตามสถานะ
   const sortedRentalItems = [...rentalItems].sort((a, b) => {
     const statusA = getStatusText(a.status, a.dueDate);
     const statusB = getStatusText(b.status, b.dueDate);
@@ -87,8 +86,8 @@ const RentalInfo = () => {
       <Layout>
         <div className="container mx-auto mt-10">
           <h1 className="text-4xl font-bold text-center mb-10">แสดงข้อมูลการยืม</h1>
-          <div className="bg-white shadow-lg rounded-lg p-6">
-            {/* Header Row */}
+          <div className="bg-cyan-50 shadow-lg rounded-lg p-6">
+            
             <div className="grid grid-cols-7 text-gray-700 font-semibold border-b pb-4 mb-4 text-center">
               <div>รายการอุปกรณ์</div>
               <div>ราคาต่อชิ้น</div>

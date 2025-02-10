@@ -6,75 +6,115 @@ import { ImMail4 } from "react-icons/im";
 import { SlGlobe } from "react-icons/sl";
 import Layout from "@/components/Layout";
 import axios from "axios";
-import Headeradmin from "@/components/Headeradmin";
+import { motion } from "framer-motion"; // ✅ เพิ่ม Animation
+import { FaSpinner } from "react-icons/fa"; // ✅ เพิ่ม Icon Loading
+
 const Contact = () => {
   const [contact, setContact] = useState(null);
+  const [loading, setLoading] = useState(true); // ✅ State สำหรับโหลดข้อมูล
 
-  // ฟังก์ชันสำหรับดึงข้อมูลการติดต่อจาก API สำหรับ ID 14
+  // ดึงข้อมูลการติดต่อจาก API
   const fetchContact = async () => {
     try {
       const response = await axios.get("http://172.31.0.1:1337/api/addcontacts/14?populate=*");
-      setContact(response.data.data); // ตั้งค่าข้อมูลที่ดึงมาจาก API
+      setContact(response.data.data);
     } catch (error) {
-      console.error("Error fetching contact:", error);
+      console.error("❌ Error fetching contact:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // ดึงข้อมูลเมื่อ component โหลดขึ้น
   useEffect(() => {
     fetchContact();
   }, []);
 
   return (
-    <div className='bg-gray-100'>
-      <Layout>
-        <div className='min-h-screen flex flex-col items-center'>
-          <div className='bg-white w-full max-w-4xl mt-10 shadow-lg rounded-lg overflow-hidden'>
-            <div className='bg-gray-200 p-4'>
-              <h1 className='text-black text-3xl'>ข้อมูลการติดต่อ</h1>
-            </div>
-            <div className='p-6'>
-              <h2 className='text-center text-xl text-red-600 mb-8'>ติดต่อเราได้ที่นี้</h2>
-              <div className='flex flex-col space-y-4 items-center'>
-                {contact ? (
-                  <div className="w-full max-w-md">
-                    {/* แสดงผล Phone */}
-                    <div className='flex items-center bg-gray-200 rounded-full p-4 mb-4'>
-                      <IoCall className='text-gray-600 w-6 h-6' />
-                      <span className='ml-4 text-gray-700'>{contact.attributes.phone}</span>
-                    </div>
+    <div className="bg-gray-100 min-h-screen">
+    <Layout>
+    <div className="bg-gray-100 mt-32 flex justify-center items-center">
+      
+        <div className="w-full max-w-4xl shadow-2xl rounded-lg overflow-hidden transform transition duration-300 hover:scale-105">
+          <motion.div
+            className="bg-cyan-100 text-white p-6 text-center"
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <h1 className="text-3xl text-gray-800 font-bold">📞 ข้อมูลการติดต่อ</h1>
+          </motion.div>
 
-                    {/* แสดงผล Email */}
-                    <div className='flex items-center bg-gray-200 rounded-full p-4 mb-4'>
-                      <ImMail4 className='text-red-600 w-6 h-6' />
-                      <span className='ml-4 text-gray-700'>{contact.attributes.email}</span>
-                    </div>
+          <div className="p-6 flex flex-col items-center">
+            <motion.h2
+              className="text-xl font-semibold text-red-500 mb-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3, duration: 0.7 }}
+            >
+              📌 ติดต่อเราได้ที่นี่!
+            </motion.h2>
 
-                    {/* แสดงผล Website */}
-                    <div className='flex items-center bg-gray-200 rounded-full p-4 mb-4'>
-                      <SlGlobe className='text-gray-600 w-6 h-6' />
-                      <a
-                        href={contact.attributes.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className='ml-4 text-gray-700'
-                      >
-                        {contact.attributes.website}
-                      </a>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center">
-                    <p>No contact information available</p>
-                  </div>
-                )}
+            {loading ? (
+              // ✅ Skeleton Loading (แสดงระหว่างโหลด)
+              <div className="flex flex-col space-y-4 w-full max-w-md">
+                <div className="bg-gray-300 h-12 rounded-full animate-pulse"></div>
+                <div className="bg-gray-300 h-12 rounded-full animate-pulse"></div>
+                <div className="bg-gray-300 h-12 rounded-full animate-pulse"></div>
               </div>
-            </div>
+            ) : contact ? (
+              <div className="w-full max-w-md space-y-4">
+                {/* 📞 แสดงผล Phone */}
+                <motion.div
+                  className="flex items-center bg-cyan-50 shadow-md rounded-full p-4 hover:bg-gray-200 transition duration-300 cursor-pointer"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <IoCall className="text-green-500 w-6 h-6" />
+                  <span className="ml-4 text-gray-700 text-lg">{contact.attributes.phone}</span>
+                </motion.div>
+
+                {/* 📧 แสดงผล Email */}
+                <motion.div
+                  className="flex items-center bg-cyan-50 shadow-md rounded-full p-4 hover:bg-gray-200 transition duration-300 cursor-pointer"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <ImMail4 className="text-red-500 w-6 h-6" />
+                  <span className="ml-4 text-gray-700 text-lg">{contact.attributes.email}</span>
+                </motion.div>
+
+                {/* 🌍 แสดงผล Website */}
+                <motion.div
+                  className="flex items-center bg-cyan-50 shadow-md rounded-full p-4 hover:bg-gray-200 transition duration-300 cursor-pointer"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <SlGlobe className="text-blue-500 w-6 h-6" />
+                  <a
+                    href={contact.attributes.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ml-4 text-blue-700 text-lg hover:underline"
+                  >
+                    {contact.attributes.website}
+                  </a>
+                </motion.div>
+              </div>
+            ) : (
+              <div className="text-center text-gray-500">
+                ❌ ไม่พบข้อมูลการติดต่อ
+              </div>
+            )}
+
+            {/* 🌟 ปุ่มรีเฟรช */}
+           
           </div>
+        </div>
         </div>
       </Layout>
     </div>
+    
+    
   );
+  
 };
+
 
 export default Contact;

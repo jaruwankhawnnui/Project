@@ -5,46 +5,46 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 export default function Home() {
-  const [webnews, setWebnews] = useState([]); // State to store fetched webnews items
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
+  const [webnews, setWebnews] = useState([]); 
+  const [loading, setLoading] = useState(true); 
+  const [error, setError] = useState(null); 
 
-  // Fetch webnews items from the API when the component mounts
+  
   useEffect(() => {
     const fetchWebnews = async () => {
       try {
         const response = await axios.get('http://172.31.0.1:1337/api/webnews?populate=*');
-        setWebnews(response.data.data); // Store the fetched data
+        setWebnews(response.data.data); 
       } catch (error) {
-        setError("Error fetching webnews"); // Handle errors
+        setError("Error fetching webnews"); 
         console.error("Error fetching webnews:", error);
       } finally {
-        setLoading(false); // Stop loading when request is done
+        setLoading(false); 
       }
     };
 
-    fetchWebnews(); // Call the fetch function
+    fetchWebnews(); 
   }, []);
 
   if (loading) {
-    return <p>Loading...</p>; // Display a loading indicator while fetching data
+    return <p>Loading...</p>; 
   }
 
   if (error) {
-    return <p>{error}</p>; // Display error if fetching fails
+    return <p>{error}</p>; 
   }
 
   return (
     <div className="min-h-screen bg-gray-100">
       <Layout>
         <main className="p-4">
-          <div className="bg-white p-6 rounded-lg shadow-l">
+          <div className="bg-cyan-50 p-6 rounded-lg shadow-l">
             <h2 className="text-3xl font-bold mb-8">ข่าวสารเว็บไซต์ !</h2>
             <div className="grid grid-cols-4 gap-2">
-              {/* Render each webnews item dynamically */}
+         
               {webnews.length > 0 ? (
                 webnews.map((newsItem) => (
-                  <div key={newsItem.id} className="bg-gray-200 p-4 h-72 rounded-l">
+                  <div key={newsItem.id} className="bg-gray-200 p-4 h-72 rounded-xl shadow-l">
                     {/* If image exists, display it */}
                     {newsItem.attributes.image && (
                       <img
@@ -53,12 +53,12 @@ export default function Home() {
                       className="w-full h-48 object-cover rounded-lg mb-2"
                     />
                     )}
-                    {/* Display the label */}
+                 
                     <p className="font-bold text-gray-600">{newsItem.attributes.label}</p>
                   </div>
                 ))
               ) : (
-                <p>No news available</p> // Show if there are no webnews items
+                <p>No news available</p> 
               )}
             </div>
           </div>

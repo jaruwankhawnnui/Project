@@ -143,12 +143,12 @@ const EquipmentPage = () => {
   return (
     <div className="bg-gray-100 min-h-screen">
       <Layout>
-        <div className="container mx-auto mt-10">
+        <div className="container mx-auto mt-10  ">
           <h1 className="text-4xl font-bold text-center mb-10">อุปกรณ์ที่ยืม</h1>
           <div className="mt-6 flex flex-col  ">
             <label className="text-lg font-semibold mb-2">เลือกปีการศึกษา</label>
             <select
-              className="border p-2 rounded-md shadow-md"
+              className="border p-2 bg-cyan-50 rounded-md shadow-md"
               value={academicYear}
               onChange={(e) => setAcademicYear(e.target.value)}
             >
@@ -160,7 +160,7 @@ const EquipmentPage = () => {
               ))}
             </select>
           </div>
-          <div className="bg-white mt-6 shadow-lg rounded-lg p-6">
+          <div className="bg-cyan-100 mt-6 shadow-lg rounded-lg p-6">
             <h2 className="text-2xl font-bold mb-6">รายการอุปกรณ์</h2>
             {userEquipmentItems.length === 0 ? (
               <div className="text-center text-gray-500 py-8">ไม่มีอุปกรณ์ที่ยืม</div>
@@ -176,7 +176,7 @@ const EquipmentPage = () => {
                   {userEquipmentItems.map((item) => (
                     <div
                       key={item.id}
-                      className="grid grid-cols-4 gap-4 items-center py-2 px-4 border rounded-lg shadow-sm bg-gray-50"
+                      className="grid grid-cols-4 gap-4 items-center py-2 px-4  rounded-lg shadow-lg bg-cyan-50"
                     >
                       <div className="flex items-center">
                         {item.imageUrl ? (

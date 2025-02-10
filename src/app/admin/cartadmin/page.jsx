@@ -18,12 +18,14 @@ const Cartadmin = ({ onNewItemAdded }) => {
     // ✅ ดึงข้อมูล `categories` จาก API
     const fetchCategories = async () => {
       try {
-        const response = await axios.get("http://172.31.0.1:1337/api/categoriesadmins");
-        const categoryData = response.data.data.map((cat) => ({
+        const response = await axios.get("http://172.31.0.1:1337/api/categoriesadmins?populate=*&pagination[limit]=100");
+        const CategoryData = response.data.data.map((cat) => ({
           id: cat.id,
-          name: cat.attributes.Label,
+          name: cat.attributes?.name,
         }));
-        setCategories(categoryData);
+        console.log(response.data)
+        // console.log("CategoryData",cat.attributes?.name)
+        setCategories(CategoryData);
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
@@ -59,15 +61,18 @@ const Cartadmin = ({ onNewItemAdded }) => {
       JSON.stringify({
         Label: formData.Label,
         Price: formData.Price,
-        Category: formData.Category,
+        // Category: data.data?.attributes.categoriesadmin.data?.attributes?.Label,
+        // Category: formData.Category,
+        categoriesadmin: formData.Category,
         item: formData.item,
         Detail: formData.Detail,
       })
     );
 
+    console.log('data', data)
     try {
       const response = await axios.post(
-        "http:/172.31.0.1:1337/api/cartadmins",
+        "http://172.31.0.1:1337/api/cartadmins",
         data,
         {
           headers: {
@@ -82,6 +87,8 @@ const Cartadmin = ({ onNewItemAdded }) => {
     }
   };
 
+
+  console.log(formData)
   return (
     <div className="bg-gray-100 min-h-screen">
       <Headeradmin>
@@ -140,9 +147,9 @@ const Cartadmin = ({ onNewItemAdded }) => {
                   className="w-full p-2 border rounded-md"
                 >
                   <option value="">-- เลือกหมวดหมู่ --</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.name}>
-                      {category.name}
+                  {categories.map((Category) => (
+                    <option key={Category.id} value={Category.id}>
+                      {Category.name}
                     </option>
                   ))}
                 </select>
@@ -173,12 +180,14 @@ const Cartadmin = ({ onNewItemAdded }) => {
                   className="w-full p-2 border rounded-md"
                 />
               </div>
-              <button
-                type="submit"
-                className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-700"
-              >
-                เพิ่มอุปกรณ์
-              </button>
+              <div className='flex justify-center'>
+                <button
+                  type="submit"
+                  className="w-3/5 bg-[#465B7E] text-white py-2 rounded-md hover:bg-blue-700"
+                >
+                  เพิ่ม
+                </button>
+              </div>
             </form>
           </div>
         </div>

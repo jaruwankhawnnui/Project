@@ -33,11 +33,12 @@ const BorrowFormPage = () => {
       const canvas = await html2canvas(formRef.current, { scale: 1 });
       const imgData = canvas.toDataURL("image/png");
 
-      const pdf = new jsPDF("p", "mm", "a4");
+      const pdf = new jsPDF("p", "mm", "a4"); // ใช้ขนาด A4
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-
+      
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, imgHeight);
+      
       return pdf;
     } catch (error) {
       console.error("❌ Error generating PDF:", error);
@@ -120,6 +121,11 @@ const BorrowFormPage = () => {
             return;
           }
           
+          const canvas = await html2canvas(formRef.current, {
+            scale: 1,
+            backgroundColor: "#ffffff", // เพิ่มพื้นหลังเป็นสีขาว
+          });
+          
 
           const itemId = inventoryData.data[0].id;
           const currentItem = inventoryData.data[0].attributes;
@@ -151,16 +157,16 @@ const BorrowFormPage = () => {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen">
+    <div className="bg-white min-h-screen">
       <Layout>
         <div className="container mx-auto mt-10">
           <div className="text-center mb-6">
             <h1 className="text-4xl font-bold">แบบฟอร์มการยืมอุปกรณ์</h1>
           </div>
 
-          <div className="bg-white  shadow-lg rounded-lg p-6" ref={formRef}>
+          <div className="bg-gray-50   p-6" ref={formRef}>
             {borrowData.length === 0 ? (
-              <div className="text-center text-gray-500 py-8">ไม่มีข้อมูล</div>
+              <div className="text-center text-white py-8">ไม่มีข้อมูล</div>
             ) : (
               <>
                 <div className="border-b pb-4 mb-6">
@@ -181,8 +187,8 @@ const BorrowFormPage = () => {
 
                 <div>
                   <h2 className="text-xl font-bold mb-4">รายการอุปกรณ์ที่ยืม:</h2>
-                  <table className="w-full border border-gray-300 text-center">
-                    <thead className="bg-gray-100">
+                  <table className="w-full border  text-center">
+                    <thead className="bg-white">
                       <tr>
                         <th className="border p-2">ลำดับ</th>
                         <th className="border p-2">ชื่ออุปกรณ์</th>
@@ -210,7 +216,7 @@ const BorrowFormPage = () => {
                   </label>
                   <textarea
                     rows="3"
-                    className="w-full mt-3 p-2 border border-gray-300 rounded-md"
+                    className="w-full mt-3 p-2 border  rounded-md"
                   ></textarea>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -218,24 +224,24 @@ const BorrowFormPage = () => {
                     <p className="text-sm mt-3  font-medium">ลงชื่อผู้ยืม:</p>
                     <input
                       type="text"
-                      className="w-full mt-3 p-2 border border-gray-300 rounded-md"
+                      className="w-full mt-3 p-2 border  rounded-md"
                     />
                     <p className="mt-3 text-sm">วันที่ยืม:</p>
                     <input
 
-                      className="w-full mt-3 p-2 border border-gray-300 rounded-md"
+                      className="w-full mt-3 p-2 border  rounded-md"
                     />
                   </div>
                   <div>
                     <p className="text-sm mt-3 font-medium">ลงชื่อผู้คืน:</p>
                     <input
                       type="text"
-                      className="w-full mt-3 p-2 border border-gray-300 rounded-md"
+                      className="w-full mt-3 p-2 border  rounded-md"
                     />
                     <p className="mt-3 text-sm">วันที่คืน:</p>
                     <input
 
-                      className="w-full mt-3 p-2 border border-gray-300 rounded-md"
+                      className="w-full mt-3 p-2 border rounded-md"
                     />
                   </div>
                 </div>
@@ -246,24 +252,24 @@ const BorrowFormPage = () => {
                     <p className="text-sm mt-3 font-medium">ลงชื่อเจ้าหน้าที่ (ตรวจสอบ):</p>
                     <input
                       type="text"
-                      className="w-full mt-3 p-2 border border-gray-300 rounded-md"
+                      className="w-full mt-3 p-2 border  rounded-md"
                     />
                     <p className="mt-3 text-sm">วันที่:</p>
                     <input
 
-                      className="w-full mt-3 p-2 border border-gray-300 rounded-md"
+                      className="w-full mt-3 p-2 border  rounded-md"
                     />
                   </div>
                   <div>
                     <p className="text-sm mt-3 font-medium">ลงชื่อเจ้าหน้าที่ (อนุมัติ):</p>
                     <input
                       type="text"
-                      className="w-full mt-3 p-2 border border-gray-300 rounded-md"
+                      className="w-full mt-3 p-2 border  rounded-md"
                     />
                     <p className="mt-3 text-sm">วันที่:</p>
                     <input
 
-                      className="w-full mt-3 p-2 border border-gray-300 rounded-md"
+                      className="w-full mt-3 p-2 border  rounded-md"
                     />
                   </div>
                 </div>

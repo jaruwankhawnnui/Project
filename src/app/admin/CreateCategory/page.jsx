@@ -22,7 +22,7 @@ const CreateCategory = ({ onNewCategoryAdded }) => {
     try {
       const response = await axios.post(
         'http://172.31.0.1:1337/api/categoriesadmins', // ✅ อัปเดตให้ใช้ไอพีที่ถูกต้อง
-        { data: { Label: label } },
+        { data: { name: label } },
         {
           headers: {
             'Content-Type': 'application/json',
@@ -67,13 +67,15 @@ const CreateCategory = ({ onNewCategoryAdded }) => {
             </div>
             {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
             {successMessage && <p className="text-green-500 text-sm mb-4">{successMessage}</p>}
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-700"
-              disabled={isLoading}
-            >
-              {isLoading ? 'กำลังเพิ่ม...' : 'เพิ่มหมวดหมู่'}
-            </button>
+            <div className='flex justify-center'>
+              <button
+                type="submit"
+                className="w-3/5 bg-[#465B7E] text-white py-2 rounded-md hover:bg-blue-700"
+                disabled={isLoading}
+              >
+                {isLoading ? 'กำลังเพิ่ม...' : 'เพิ่ม'}
+              </button>
+            </div>
           </form>
         </div>
       </Headeradmin>

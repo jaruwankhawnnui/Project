@@ -126,9 +126,10 @@ const MainHeader = ({ session }) => {
             />
           ) : (
             <Link href="/">
-              <button className="bg-red-500 text-white px-4 py-2 rounded-lg">
-                Logout
+              <button className="bg-red-500 text-white flex items-center justify-center px-4 py-2 rounded-lg mx-auto">
+                <FaSignOutAlt className="mr-2" /> ออกจากระบบ
               </button>
+
             </Link>
           )}
         </div>
@@ -138,38 +139,63 @@ const MainHeader = ({ session }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={toggleMenu}></div>
       )}
       <div className={`fixed right-0 top-0 h-full bg-white w-64 shadow-lg z-50 transform ${menuVisible ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out`}>
-        <ul className='p-4'>
-          <li className='flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4'>
-            <FaHome className='mr-2' />
-            <Link href="/homepage">หน้าแรก</Link>
-          </li>
-          <li className='flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4'>
-            <TiShoppingCart className='mr-2' />
-            <Link href="/cart">รถเข็น</Link>
-          </li>
-          <li className='flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4'>
-            <FaThList className='mr-2' />
-            <Link href="/equipment">ยืมอุปกรณ์</Link>
-          </li>
-          <li className='flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4'>
-            <CiBoxList className='mr-2' />
-            <Link href="/rentalinfo">แสดงข้อมูลการยืม</Link>
-          </li>
-          <li className='flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4'>
-            <FaNewspaper className='mr-2' />
-            <Link href="/webnew">ข่าวสารเว็บไซต์</Link>
-          </li>
-          <li className='flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4'>
-            <GrContactInfo className='mr-2' />
-            <Link href="/contact">ข้อมูลการติดต่อ</Link>
-          </li>
-          <li className='flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4'>
-            <RiFileListLine className='mr-2 ' />
-            <Link href="/agreement">ข้อตกลงการใช้งาน</Link>
-          </li>
-          <li className='flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4'>
-            <FaSignOutAlt className='mr-2 ' />
-            <Logout />
+        <ul className="p-4">
+          <Link href="/homepage" className="block">
+            <li className="flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4 cursor-pointer">
+              <FaHome className="mr-2" />
+              หน้าแรก
+            </li>
+          </Link>
+
+          <Link href="/cart" className="block">
+            <li className="flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4 cursor-pointer">
+              <TiShoppingCart className="mr-2" />
+              รถเข็น
+            </li>
+          </Link>
+
+          <Link href="/equipment" className="block">
+            <li className="flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4 cursor-pointer">
+              <FaThList className="mr-2" />
+              ยืมอุปกรณ์
+            </li>
+          </Link>
+
+          <Link href="/rentalinfo" className="block">
+            <li className="flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4 cursor-pointer">
+              <CiBoxList className="mr-2" />
+              แสดงข้อมูลการยืม
+            </li>
+          </Link>
+
+          <Link href="/webnew" className="block">
+            <li className="flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4 cursor-pointer">
+              <FaNewspaper className="mr-2" />
+              ข่าวสารเว็บไซต์
+            </li>
+          </Link>
+
+          <Link href="/contact" className="block">
+            <li className="flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4 cursor-pointer">
+              <GrContactInfo className="mr-2" />
+              ข้อมูลการติดต่อ
+            </li>
+          </Link>
+
+          <Link href="/agreement" className="block">
+            <li className="flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4 cursor-pointer">
+              <RiFileListLine className="mr-2" />
+              ข้อตกลงการใช้งาน
+            </li>
+          </Link>
+
+          {/* Logout Button */}
+          <li
+            className="flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4 cursor-pointer"
+            onClick={Logout}
+          >
+            <FaSignOutAlt className="mr-2" />
+            ออกจากระบบ
           </li>
         </ul>
       </div>

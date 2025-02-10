@@ -30,6 +30,7 @@ const Cart = () => {
           `http://172.31.0.1:1337/api/adds?filters[email][$eq]=${session.user.email}&populate=image`
         );
 
+        
         if (response.ok) {
           const data = await response.json();
           const enrichedItems = data.data.map((item) => ({
@@ -264,7 +265,7 @@ const Cart = () => {
             <div className="text-center py-10">ไม่มีอุปกรณ์ในประวัติการยืม</div>
           ) : (
             <div>
-              <div className="shadow-lg bg-white p-4 rounded-lg">
+              <div className="shadow-lg bg-cyan-50 p-4 rounded-lg">
                 {items.map((item, index) => {
                   const totalPrice = item.attributes?.Price * item.quantity;
                   const imageUrl = item.attributes?.image.data[0].attributes.url;
@@ -319,7 +320,7 @@ const Cart = () => {
                   );
                 })}
               </div>
-              <div className="flex justify-between items-center bg-white p-4 rounded-lg mt-4 shadow-lg">
+              <div className="flex justify-between items-center bg-cyan-50 p-4 rounded-lg mt-4 shadow-lg">
                 <div onClick={handleSelectAllChange} className="flex items-center cursor-pointer">
                   {isSelectAllChecked ? (
                     <RiCheckboxLine className="w-6 h-6 text-green-500" />

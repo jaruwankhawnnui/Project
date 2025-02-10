@@ -64,7 +64,7 @@ const AddContact = ({ onNewItemAdded }) => {
               {/* ฟิลด์ phone */}
               <div className="mb-4">
                 <label className="block text-gray-700 font-bold" htmlFor="phone">
-                  Phone
+                  เบอร์โทรศัพท์
                 </label>
                 <input
                   type="text"
@@ -73,7 +73,7 @@ const AddContact = ({ onNewItemAdded }) => {
                   value={formData.phone}
                   onChange={handleChange}
                   className="w-full p-2 border rounded-md"
-                  placeholder="ใส่เบอร์โทรศัพท์..."
+                  placeholder="กรอกเบอร์โทรศัพท์"
                   required
                 />
               </div>
@@ -81,7 +81,7 @@ const AddContact = ({ onNewItemAdded }) => {
               {/* ฟิลด์ email */}
               <div className="mb-4">
                 <label className="block text-gray-700 font-bold" htmlFor="email">
-                  Email
+                  อีเมล
                 </label>
                 <input
                   type="email"
@@ -90,7 +90,7 @@ const AddContact = ({ onNewItemAdded }) => {
                   value={formData.email}
                   onChange={handleChange}
                   className="w-full p-2 border rounded-md"
-                  placeholder="ใส่อีเมล..."
+                  placeholder="กรอกอีเมล"
                   required
                 />
               </div>
@@ -98,7 +98,7 @@ const AddContact = ({ onNewItemAdded }) => {
               {/* ฟิลด์ website */}
               <div className="mb-4">
                 <label className="block text-gray-700 font-bold" htmlFor="website">
-                  Website
+                  เว็บไซต์
                 </label>
                 <input
                   type="url"
@@ -107,17 +107,19 @@ const AddContact = ({ onNewItemAdded }) => {
                   value={formData.website}
                   onChange={handleChange}
                   className="w-full p-2 border rounded-md"
-                  placeholder="ใส่ลิงก์เว็บไซต์..."
+                  placeholder="กรอกลิงก์เว็บไซต์"
                   required
                 />
               </div>
 
-              <button
-                type="submit"
-                className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-700"
-              >
-                Confirm
-              </button>
+              <div className="flex justify-center">
+                <button
+                  type="submit"
+                  className="w-3/5 bg-[#465B7E] text-white py-2 rounded-md hover:bg-blue-700"
+                >
+                  ยืนยัน
+                </button>
+              </div>
             </form>
           </div>
         </div>
