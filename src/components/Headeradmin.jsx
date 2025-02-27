@@ -14,7 +14,7 @@ export default function Navbar({ children }) {
     const fetchPendingRequests = async () => {
       try {
         const response = await fetch(
-          `http://172.19.32.1:1337/api/borrows?filters[status][$eq]=รอดำเนินการ`
+          `http://172.21.32.1:1337/api/borrows?filters[status][$eq]=รอดำเนินการ`
         );
         if (response.ok) {
           const data = await response.json();

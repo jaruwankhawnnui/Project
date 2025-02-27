@@ -16,7 +16,7 @@ const Contact = () => {
   // ดึงข้อมูลการติดต่อจาก API
   const fetchContact = async () => {
     try {
-      const response = await axios.get("http://172.19.32.1:1337/api/addcontacts/14?populate=*");
+      const response = await axios.get("http://172.21.32.1:1337/api/addcontacts/14?populate=*");
       setContact(response.data.data);
     } catch (error) {
       console.error("❌ Error fetching contact:", error);
