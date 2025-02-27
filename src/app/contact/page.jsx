@@ -16,7 +16,7 @@ const Contact = () => {
   // ดึงข้อมูลการติดต่อจาก API
   const fetchContact = async () => {
     try {
-      const response = await axios.get("http://172.31.0.1:1337/api/addcontacts/14?populate=*");
+      const response = await axios.get("http://172.19.32.1:1337/api/addcontacts/14?populate=*");
       setContact(response.data.data);
     } catch (error) {
       console.error("❌ Error fetching contact:", error);
@@ -32,16 +32,16 @@ const Contact = () => {
   return (
     <div className="bg-gray-100 min-h-screen">
     <Layout>
-    <div className="bg-gray-100 mt-32 flex justify-center items-center">
+    <div className="   mt-32 flex justify-center items-center">
       
-        <div className="w-full max-w-4xl shadow-2xl rounded-lg overflow-hidden transform transition duration-300 hover:scale-105">
+        <div className="w-full max-w-3xl shadow-xl bg-cyan-50 rounded-lg overflow-hidden transform transition duration-300 hover:scale-105">
           <motion.div
-            className="bg-cyan-100 text-white p-6 text-center"
+            className="bg-[#465B7E] text-white p-6 text-center"
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-3xl text-gray-800 font-bold">📞 ข้อมูลการติดต่อ</h1>
+            <h1 className="text-3xl text-white font-bold"> ข้อมูลการติดต่อ</h1>
           </motion.div>
 
           <div className="p-6 flex flex-col items-center">
@@ -65,7 +65,7 @@ const Contact = () => {
               <div className="w-full max-w-md space-y-4">
                 {/* 📞 แสดงผล Phone */}
                 <motion.div
-                  className="flex items-center bg-cyan-50 shadow-md rounded-full p-4 hover:bg-gray-200 transition duration-300 cursor-pointer"
+                  className="flex items-center bg-white shadow-md rounded-full p-4 hover:bg-gray-200 transition duration-300 cursor-pointer"
                   whileHover={{ scale: 1.05 }}
                 >
                   <IoCall className="text-green-500 w-6 h-6" />
@@ -74,7 +74,7 @@ const Contact = () => {
 
                 {/* 📧 แสดงผล Email */}
                 <motion.div
-                  className="flex items-center bg-cyan-50 shadow-md rounded-full p-4 hover:bg-gray-200 transition duration-300 cursor-pointer"
+                  className="flex items-center bg-white shadow-md rounded-full p-4 hover:bg-gray-200 transition duration-300 cursor-pointer"
                   whileHover={{ scale: 1.05 }}
                 >
                   <ImMail4 className="text-red-500 w-6 h-6" />
@@ -83,7 +83,7 @@ const Contact = () => {
 
                 {/* 🌍 แสดงผล Website */}
                 <motion.div
-                  className="flex items-center bg-cyan-50 shadow-md rounded-full p-4 hover:bg-gray-200 transition duration-300 cursor-pointer"
+                  className="flex items-center bg-white shadow-md rounded-full p-4 hover:bg-gray-200 transition duration-300 cursor-pointer"
                   whileHover={{ scale: 1.05 }}
                 >
                   <SlGlobe className="text-blue-500 w-6 h-6" />

@@ -24,7 +24,7 @@ const MainHeader = ({ session }) => {
 
       try {
         const response = await fetch(
-          `http://172.31.0.1:1337/api/borrows?filters[email][$eq]=${session.user.email}&filters[status][$eq]=เลยกำหนด&populate=*`
+          `http://172.19.32.1:1337/api/borrows?filters[email][$eq]=${session.user.email}&filters[status][$eq]=รายการที่เลยกำหนด&populate=*`
         );
 
         if (!response.ok) {
@@ -127,7 +127,7 @@ const MainHeader = ({ session }) => {
           ) : (
             <Link href="/">
               <button className="bg-red-500 text-white flex items-center justify-center px-4 py-2 rounded-lg mx-auto">
-                <FaSignOutAlt className="mr-2" /> ออกจากระบบ
+                <FaSignOutAlt className="mr-1" /> ออกจากระบบ
               </button>
 
             </Link>

@@ -14,7 +14,7 @@ const RentalInfo = () => {
 
       try {
         const response = await fetch(
-          `http://172.31.0.1:1337/api/borrows?filters[email][$eq]=${session.user.email}&populate=*`
+          `http://172.21.32.1:1337/api/borrows?filters[email][$eq]=${session.user.email}&populate=*`
         );
 
         if (response.ok) {
@@ -26,7 +26,7 @@ const RentalInfo = () => {
             quantity: item.attributes.amount,
             borrowingDate: item.attributes.Borrowing_date,
             dueDate: item.attributes.Due,
-            status: item.attributes.status || "รอดำเนินการ", 
+            status: item.attributes.status || "รอดำเนินการ",
           }));
           setRentalItems(items);
         } else {
@@ -40,62 +40,84 @@ const RentalInfo = () => {
     fetchRentalData();
   }, [session?.user?.email]);
 
+  const updateStatusInBorrow = async (id, status) => {
+    try {
+      await fetch(`http://172.21.32.1:1337/api/borrows/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ data: { status } }),
+      });
+    } catch (error) {
+      console.error("Error updating status in /api/borrows:", error);
+    }
+  };
+
   const getStatusClass = (status, dueDate) => {
     const now = new Date();
-    if (status === "กำลังยืม") return "bg-yellow-200";
-    if (status === "ถูกปฏิเสธ") return "bg-gray-200";
-    if (status === "คืนแล้ว") return "bg-green-200";
+    if (status === "รายการกำลังยืม") return "bg-yellow-200";
+    if (status === "รายการถูกปฏิเสธ") return "bg-gray-300";
+    if (status === "รายการคืนสำเร็จ") return "bg-green-200";
     if (new Date(dueDate) < now) return "bg-red-200";
-    return "bg-blue-200"; // สีสำหรับ "รอดำเนินการ"
+    return "bg-[#A2E2F8]"; // สีสำหรับ "รอดำเนินการ"
   };
 
   const getStatusText = (status, dueDate) => {
     const now = new Date();
-    if (status === "กำลังยืม") return "กำลังยืม";
-    if (status === "ถูกปฏิเสธ") return "ถูกปฏิเสธ";
-    if (status === "คืนแล้ว") return "คืนแล้ว";
-    if (new Date(dueDate) < now) return "เลยกำหนด";
+    if (status === "รายการกำลังยืม") return "รายการกำลังยืม";
+    if (status === "รายการถูกปฏิเสธ") return "รายการถูกปฏิเสธ";
+    if (status === "รายการคืนสำเร็จ") return "รายการคืนสำเร็จ";
+    if (new Date(dueDate) < now) return "รายการเกินกำหนดคืน";
     return "รอดำเนินการ";
   };
 
   useEffect(() => {
     rentalItems.forEach((item) => {
       const now = new Date();
-      if (new Date(item.dueDate) < now && item.status !== "เลยกำหนด") {
-        updateStatusInBorrow(item.id, "เลยกำหนด");
+      if (new Date(item.dueDate) < now && item.status !== "รายการเกินกำหนดคืน") {
+        updateStatusInBorrow(item.id, "รายการเกินกำหนดคืน");
       }
     });
   }, [rentalItems]);
 
- 
+
   const statusOrder = {
-    "เลยกำหนด": 1,
-    "กำลังยืม": 2,
-    "คืนแล้ว": 3,
-    "รอดำเนินการ": 4,
+    "รายการเกินกำหนดคืน": 1,
+    "รายการกำลังยืม": 2,
+    "รายการคืนสำเร็จ": 3,
+    "รายการถูกปฏิเสธ": 4, 
+    "รอดำเนินการ": 5,
   };
 
   const sortedRentalItems = [...rentalItems].sort((a, b) => {
     const statusA = getStatusText(a.status, a.dueDate);
     const statusB = getStatusText(b.status, b.dueDate);
-    return statusOrder[statusA] - statusOrder[statusB];
+    
+    return (statusOrder[statusA] || 99) - (statusOrder[statusB] || 99);
   });
-
+  
   return (
     <div className="bg-gray-100 min-h-screen">
       <Layout>
         <div className="container mx-auto mt-10">
-          <h1 className="text-4xl font-bold text-center mb-10">แสดงข้อมูลการยืม</h1>
+
+          <div className="flex justify-center  items-center bg-[#465B7E] p-3 rounded-lg mb-6">
+            <h1 className="w-full text-white text-3xl pl-10 font-bold">
+              แสดงข้อมูลการยืม
+            </h1>
+          </div>
+
           <div className="bg-cyan-50 shadow-lg rounded-lg p-6">
-            
-            <div className="grid grid-cols-7 text-gray-700 font-semibold border-b pb-4 mb-4 text-center">
-              <div>รายการอุปกรณ์</div>
-              <div>ราคาต่อชิ้น</div>
-              <div>จำนวน</div>
-              <div>ราคารวม</div>
-              <div>วันที่ยืม</div>
-              <div>กำหนดคืน</div>
-              <div>สถานะ</div>
+
+            <div className="grid grid-cols-7 text-white gap-4 py-3 px-4 font-bold border-b  mb-4 bg-[#5a7dbb] rounded-md">
+              <div className="text-center">รายการอุปกรณ์</div>
+              <div className="text-center">ราคา/ชิ้น</div>
+              <div className="text-center">จำนวน</div>
+              <div className="text-center">ราคารวม</div>
+              <div className="text-center">วันที่ยืม</div>
+              <div className="text-center">กำหนดคืน</div>
+              <div className="text-center">สถานะ</div>
             </div>
 
             {sortedRentalItems.length === 0 ? (
@@ -104,14 +126,14 @@ const RentalInfo = () => {
               sortedRentalItems.map((item, index) => (
                 <div
                   key={index}
-                  className={`grid grid-cols-7 gap-4 items-center py-4 px-4 mb-4 rounded-lg shadow ${getStatusClass(
+                  className={`grid grid-cols-7 gap-4 items-center py-2 px-4 mb-4 rounded-lg shadow ${getStatusClass(
                     item.status,
                     item.dueDate
                   )}`}
                 >
                   <div className="flex items-center">
                     <div className="ml-4">
-                      <p className="text-lg font-bold text-gray-800">{item.label}</p>
+                      <p className="text-md font-normal text-gray-800">{item.label}</p>
                     </div>
                   </div>
                   <div className="text-center">{item.price} ฿</div>
@@ -123,7 +145,7 @@ const RentalInfo = () => {
                   <div className="text-center">
                     {new Date(item.dueDate).toLocaleDateString("th-TH") || "N/A"}
                   </div>
-                  <div className="text-center font-semibold">
+                  <div className="text-center">
                     {getStatusText(item.status, item.dueDate)}
                   </div>
                 </div>

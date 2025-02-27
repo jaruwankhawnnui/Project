@@ -16,7 +16,7 @@ export default function ApprovalPage() {
   useEffect(() => {
     const fetchBorrowRequests = async () => {
       try {
-        const response = await fetch(`http://172.31.0.1:1337/api/borrows?populate=*`);
+        const response = await fetch(`http://172.21.32.1:1337/api/borrows?populate=*`);
         if (response.ok) {
           const data = await response.json();
           const formattedRequests = data.data.map((item) => ({
@@ -50,7 +50,7 @@ export default function ApprovalPage() {
 
   const updateStatus = async (id, newStatus) => {
     try {
-      const response = await fetch(`http://172.31.0.1:1337/api/borrows/${id}`, {
+      const response = await fetch(`http://172.21.32.1:1337/api/borrows/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ data: { status: newStatus } }),
@@ -71,7 +71,7 @@ export default function ApprovalPage() {
   };
   const viewPDF = async (id) => {
     try {
-      const response = await fetch(`http://172.31.0.1:1337/api/borrows/${id}?populate=form`);
+      const response = await fetch(`http://172.21.32.1:1337/api/borrows/${id}?populate=form`);
       if (response.ok) {
         const data = await response.json();
         console.log("Borrow Data:", data);
@@ -280,7 +280,7 @@ export default function ApprovalPage() {
             <div className="flex justify-between items-end mt-auto">
               <button
                 onClick={handlePreviousPage}
-                className="bg-[#465B7E] text-white min-w-20 px-3 py-2 text-sm rounded-md hover:bg-blue-600 flex items-center justify-center"
+                className="bg-[#465B7E] text-white min-w-20 px-3 py-2 text-sm rounded-md hover:bg-blue-950 flex items-center justify-center"
                 disabled={currentPage === 1}
               >
                 ก่อนหน้า
@@ -288,7 +288,7 @@ export default function ApprovalPage() {
 
               <button
                 onClick={handleNextPage}
-                className="bg-[#465B7E] text-white min-w-20 px-3 py-2 text-sm rounded-md hover:bg-blue-600 flex items-center justify-center"
+                className="bg-[#465B7E] text-white min-w-20 px-3 py-2 text-sm rounded-md hover:bg-blue-950 flex items-center justify-center"
                 disabled={currentPage === totalPages}
               >
                 ถัดไป

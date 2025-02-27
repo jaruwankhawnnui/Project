@@ -10,10 +10,11 @@ export default function Navbar({ children }) {
   const currentPath = router.pathname; // ✅ ได้ค่า URL ปัจจุบัน
 
   useEffect(() => {
+    // ดึงข้อมูลการขอยืมที่รอดำเนินการ
     const fetchPendingRequests = async () => {
       try {
         const response = await fetch(
-          `http://172.31.0.1:1337/api/borrows?filters[status][$eq]=รอดำเนินการ`
+          `http://172.19.32.1:1337/api/borrows?filters[status][$eq]=รอดำเนินการ`
         );
         if (response.ok) {
           const data = await response.json();
@@ -37,8 +38,8 @@ export default function Navbar({ children }) {
 
   return (
     <div>
-      <nav className="bg-gradient-to-br from-cyan-100 to-[#6EC7E2] p-6 mb-4">
-        <div className="max-w-screen-xl mx-2 flex items-center justify-between">
+      <nav className="bg-gradient-to-br from-cyan-100 to-[#6EC7E2] p-6 ">
+        <div className="  flex items-center justify-between">
           {/* Left Side - Logo */}
           <div className="flex items-center">
             <img
@@ -51,12 +52,12 @@ export default function Navbar({ children }) {
           </div>
 
           {/* Middle - Navigation Links */}
-          <div className="hidden md:flex text-l font-bold">
-            <a href="/admin/dashboard" className={isActive("/admin/dashboard")}>
-              Dashboard
+          <div className="hidden md:flex text-sm font-bold">
+            <a href="/admin/dashboard" className={isActive("/admin/dashboard ")}>
+              แดชบอร์ด
             </a>
             <a href="/admin/CreateCategory" className={isActive("/admin/CreateCategory")}>
-              Categories
+              หมวดหมู่
             </a>
             <a href="/admin/year" className={isActive("/admin/year")}>
               ปีการศึกษา
@@ -84,7 +85,15 @@ export default function Navbar({ children }) {
               )}
             </a>
           </div>
+
+          {/* Right Side - Admin Role */}
+          <div className="flex items-center text-gray-700 space-x-2 ml-12 border border-gray-400 rounded-md px-4 py-2 shadow-md bg-white">
+            <FaUserCircle className="text-4xl" />
+            <span className="text-l font-bold">Admin</span>
+          </div>
+
         </div>
+
       </nav>
       {children}
     </div>

@@ -30,7 +30,7 @@ const AddContact = ({ onNewItemAdded }) => {
 
     try {
       const response = await axios.put(
-        "http://172.19.224.1:1337/api/addcontacts/14", // URL ของ API สำหรับเพิ่มข้อมูล
+        "http://172.19.32.1:1337/api/addcontacts/14", // URL ของ API สำหรับเพิ่มข้อมูล
         {
           data: contactData,
         },
@@ -115,7 +115,7 @@ const AddContact = ({ onNewItemAdded }) => {
               <div className="flex justify-center">
                 <button
                   type="submit"
-                  className="w-3/5 bg-[#465B7E] text-white py-2 rounded-md hover:bg-blue-700"
+                  className="w-3/5 bg-[#465B7E] text-white py-2 rounded-md hover:bg-blue-950"
                 >
                   ยืนยัน
                 </button>

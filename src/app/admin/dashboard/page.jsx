@@ -18,8 +18,8 @@ const BorrowSummaryPage = () => {
     const fetchData = async () => {
       try {
         const [borrowRes, inventoryRes] = await Promise.all([
-          fetch("http://172.31.0.1:1337/api/borrows"),
-          fetch("http://172.31.0.1:1337/api/cartadmins")
+          fetch("http://172.21.32.1:1337/api/borrows"),
+          fetch("http://172.21.32.1:1337/api/cartadmins")
         ]);
 
         if (!borrowRes.ok || !inventoryRes.ok) {

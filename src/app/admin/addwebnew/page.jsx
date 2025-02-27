@@ -1,123 +1,133 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'; // Import axios
-import Headeradmin from "@/components/Headeradmin"; // Assuming you have a Layout component
+import axios from 'axios';
+import Headeradmin from "@/components/Headeradmin";
+
+const API_URL = "http://172.21.32.1:1337/api/webnews"; // URL ของ Strapi
 
 const CommentPage = () => {
-  // State declarations
-  const [comments, setComments] = useState([]); // For storing all webnews items
-  const [label, setLabel] = useState(''); // For storing the label input
-  const [image, setImage] = useState(null); // For storing the selected image
-  const [loading, setLoading] = useState(false); // Loading status
+  const [comments, setComments] = useState([]);
+  const [label, setLabel] = useState('');
+  const [image, setImage] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null); // ✅ ใช้แสดงรูปภาพที่มีอยู่แล้ว
+  const [loading, setLoading] = useState(false);
+  const [editComment, setEditComment] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
-  // Fetch webnews items from Strapi API on first load
   useEffect(() => {
-    const fetchComments = async () => {
-      try {
-        const response = await axios.get('http://172.31.0.1:1337/api/webnews?populate=*'); // Correct endpoint for fetching webnews
-        setComments(response.data.data); // Store the fetched webnews items
-      } catch (error) {
-        console.error('Error fetching comments:', error);
-      }
-    };
-
-    fetchComments(); // Fetch data from Strapi
+    fetchComments();
   }, []);
 
-  // Handle label input change
+  const fetchComments = async () => {
+    try {
+      const response = await axios.get(`${API_URL}?populate=*`);
+      setComments(response.data.data);
+    } catch (error) {
+      console.error('❌ Error fetching comments:', error);
+    }
+  };
+
   const handleLabelChange = (e) => {
-    setLabel(e.target.value); // Update the label input
+    setLabel(e.target.value);
   };
 
-  // Handle image input change
   const handleImageChange = (e) => {
-    setImage(e.target.files[0]); // Store the selected image file
+    const file = e.target.files[0];
+    setImage(file);
+    setPreviewImage(URL.createObjectURL(file)); // ✅ แสดงภาพตัวอย่าง
   };
 
-  // Handle form submission to add a new webnews item
   const handleCommentSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form submission
-    setLoading(true); // Set loading state to true during the request
+    e.preventDefault();
+    setLoading(true);
+    setSuccessMessage(null);
+    setErrorMessage(null);
 
-    const formData = new FormData(); // Use FormData to send multipart data
-    formData.append('data', JSON.stringify({ label })); // Add label data
+    const formData = new FormData();
+    formData.append('data', JSON.stringify({ label }));
+
     if (image) {
-      formData.append('files.image', image); // Add image file if selected
+      formData.append('files.image', image);
     }
 
     try {
-      const response = await axios.post('http://172.31.0.1:1337/api/webnews', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data', // Set the correct headers for file upload
-        },
-      });
+      if (editComment) {
+        // ✅ แก้ไขข้อมูลและอัปเดตรูปภาพถ้ามีการเปลี่ยนแปลง
+        await axios.put(`${API_URL}/${editComment.id}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        setSuccessMessage("✅ แก้ไขข่าวสารสำเร็จ!");
+      } else {
+        // ✅ เพิ่มข่าวสารใหม่
+        await axios.post(API_URL, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        setSuccessMessage("🎉 เพิ่มข่าวสารสำเร็จ!");
+      }
 
-      // Append the newly added webnews item to the state
-      setComments([...comments, response.data.data]);
-
-      // Reset the input fields
       setLabel('');
       setImage(null);
+      setPreviewImage(null);
+      setEditComment(null);
+      fetchComments();
     } catch (error) {
-      console.error('Error posting comment:', error);
+      console.error("❌ Error posting comment:", error);
+      setErrorMessage("❌ ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
-      setLoading(false); // Set loading state to false after request completion
+      setLoading(false);
     }
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm("⚠️ คุณแน่ใจหรือไม่ว่าต้องการลบข่าวสารนี้?")) return;
+
+    try {
+      await axios.delete(`${API_URL}/${id}`);
+      setSuccessMessage("✅ ลบข่าวสารสำเร็จ!");
+      fetchComments();
+    } catch (error) {
+      console.error("❌ ลบไม่สำเร็จ:", error);
+      setErrorMessage("❌ ไม่สามารถลบข่าวสารได้ กรุณาลองใหม่");
+    }
+  };
+
+  const handleEdit = (comment) => {
+    setLabel(comment.attributes.label);
+    setEditComment(comment);
+
+    // ✅ โหลดรูปภาพปัจจุบัน
+    const currentImage = comment.attributes.image?.data?.attributes?.url;
+    setPreviewImage(currentImage || null);
   };
 
   return (
     <div className="min-h-screen bg-gray-200">
       <Headeradmin>
         <div className="max-w-2xl mt-6 mx-auto p-6 bg-white rounded-lg">
-          <h1 className="text-2xl font-bold mb-4">เพิ่มข่าวสาร</h1>
+          <h1 className="text-2xl font-bold mb-4">{editComment ? "แก้ไขข่าวสาร" : "เพิ่มข่าวสาร"}</h1>
 
-          {/* Form to add new webnews */}
+          {successMessage && <p className="text-green-500">{successMessage}</p>}
+          {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+
           <form onSubmit={handleCommentSubmit} className="mb-4">
-            {/* Image Upload Field */}
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2">อัปโหลดรูปภาพ</label>
-              <label
-                htmlFor="image-upload"
-                className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50"
-              >
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <svg
-                    aria-hidden="true"
-                    className="w-10 h-10 mb-3 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M7 16l-4-4m0 0l4-4m-4 4h18M17 8v8"
-                    ></path>
-                  </svg>
-                  <p className="mb-2 text-sm text-gray-500">
-                    <span className="font-semibold">แนบรูปภาพ</span>
-                  </p>
+              <input type="file" accept="image/*" onChange={handleImageChange} className="w-full p-2 border rounded-md" />
+              {previewImage && (
+                <div className="mt-2">
+                  <img src={previewImage} alt="Preview" className="h-32 w-full object-cover rounded-lg" />
                 </div>
-                <input
-                  id="image-upload"
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                />
-              </label>
+              )}
             </div>
 
-            {/* Label Input Field */}
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2">หัวข้อข่าวสาร</label>
               <input
                 type="text"
                 value={label}
                 onChange={handleLabelChange}
-                className="w-full p-2 border border-gray-300 rounded-lg"
+                className="w-full p-2 border rounded-md"
                 placeholder="กรอกหัวข้อข่าวสาร"
                 required
               />
@@ -126,14 +136,47 @@ const CommentPage = () => {
             <div className='flex justify-center'>
               <button
                 type="submit"
-                className="bg-[#465B7E] w-3/5 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                className="bg-[#465B7E] w-3/5 text-white px-4 py-2 rounded-lg hover:bg-blue-950"
                 disabled={loading}
               >
-                {loading ? 'กำลังส่ง...' : 'เพิ่ม'}
+                {loading ? 'กำลังบันทึก...' : editComment ? "บันทึกการแก้ไข" : "เพิ่ม"}
               </button>
-
             </div>
           </form>
+        </div>
+
+        {/* ✅ แสดงรายการข่าวสาร */}
+        <div className="max-w-3xl mx-auto mt-10 bg-white shadow-md rounded-md p-6">
+          <h2 className="text-xl font-bold mb-4">รายการข่าวสาร</h2>
+          <table className="w-full border-collapse border border-gray-300">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border border-gray-300 px-4 py-2 w-10">#</th>
+                
+                <th className="border border-gray-300 px-4 py-2">หัวข้อข่าวสาร</th>
+                <th className="border border-gray-300 px-4 py-2 w-40">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {comments.length > 0 ? (
+                comments.map((comment, index) => (
+                  <tr key={comment.id} className="text-center">
+                    <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
+                  
+                    <td className="border border-gray-300 px-4 py-2">{comment.attributes.label}</td>
+                    <td className="border border-gray-300 px-4 py-2 flex justify-center items-center space-x-2">
+                     
+                      <button onClick={() => handleDelete(comment.id)} className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-700">
+                        ลบ
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr><td colSpan="4" className="text-center py-4">ไม่มีข่าวสาร</td></tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </Headeradmin>
     </div>

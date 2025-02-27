@@ -5,12 +5,15 @@ import Layout from "@/components/Layout";
 import { IoClose } from "react-icons/io5";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { AiOutlineLoading3Quarters } from "react-icons/ai"; // ✅ เพิ่มไอคอนโหลด
+import { motion } from "framer-motion";
 
 const EquipmentPage = () => {
   const [userEquipmentItems, setUserEquipmentItems] = useState([]);
   const [academicYears, setAcademicYears] = useState([]); // ✅ เก็บข้อมูลปีการศึกษาจาก API
   const [academicYear, setAcademicYear] = useState(""); // ✅ เก็บปีการศึกษาที่เลือก
   const { data: session } = useSession();
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -20,7 +23,7 @@ const EquipmentPage = () => {
     const fetchUserEquipmentItems = async () => {
       try {
         const response = await fetch(
-          `http://172.31.0.1:1337/api/equipment?filters[email][$eq]=${session.user.email}&populate=image`
+          `http://172.21.32.1:1337/api/equipment?filters[email][$eq]=${session.user.email}&populate=image`
         );
         if (response.ok) {
           const data = await response.json();
@@ -31,7 +34,7 @@ const EquipmentPage = () => {
               item.attributes.image?.data?.length > 0
                 ? item.attributes.image.data[0].attributes.url.startsWith("http")
                   ? item.attributes.image.data[0].attributes.url
-                  : `http://172.31.0.1:1337${item.attributes.image.data[0].attributes.url}`
+                  : `http://172.21.32.1:1337${item.attributes.image.data[0].attributes.url}`
                 : null,
           }));
           setUserEquipmentItems(items);
@@ -50,7 +53,7 @@ const EquipmentPage = () => {
     // ✅ ดึงข้อมูลปีการศึกษาจาก /api/Years
     const fetchAcademicYears = async () => {
       try {
-        const response = await fetch("http://172.31.0.1:1337/api/Years");
+        const response = await fetch("http://172.21.32.1:1337/api/Years");
         if (response.ok) {
           const data = await response.json();
           const Years = data.data.map((year) => year.attributes.Year);
@@ -69,7 +72,7 @@ const EquipmentPage = () => {
 
   const handleDeleteItem = async (id) => {
     try {
-      const response = await fetch(`http://172.31.0.1:1337/api/equipment/${id}`, {
+      const response = await fetch(`http://172.21.32.1:1337/api/equipment/${id}`, {
         method: "DELETE",
       });
 
@@ -85,8 +88,14 @@ const EquipmentPage = () => {
       alert("เกิดข้อผิดพลาดในการลบอุปกรณ์");
     }
   };
+  useEffect(() => {
+    console.log(userEquipmentItems); // ตรวจสอบข้อมูล
+  }, [userEquipmentItems]);
+
+
 
   const handleGoToBorrowForm = async () => {
+    setIsLoading(true);
     if (!session?.user?.email) {
       alert("กรุณาเข้าสู่ระบบก่อนดำเนินการ");
       return;
@@ -118,7 +127,7 @@ const EquipmentPage = () => {
 
       // ✅ อัปเดตอุปกรณ์ที่เลือกใน Strapi โดยเพิ่มปีการศึกษา
       const updateEquipmentPromises = userEquipmentItems.map((item) =>
-        fetch(`http://172.31.0.1:1337/api/equipment/${item.id}`, {
+        fetch(`http://172.21.32.1:1337/api/equipment/${item.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -138,17 +147,24 @@ const EquipmentPage = () => {
     } catch (error) {
       console.error("Error preparing data for borrow form:", error);
       alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+    } finally {
+      setIsLoading(false);
     }
   };
   return (
-    <div className="bg-gray-100 min-h-screen">
+    <div className="bg-gray-100 min-h-screen pb-32">
       <Layout>
         <div className="container mx-auto mt-10  ">
-          <h1 className="text-4xl font-bold text-center mb-10">อุปกรณ์ที่ยืม</h1>
-          <div className="mt-6 flex flex-col  ">
-            <label className="text-lg font-semibold mb-2">เลือกปีการศึกษา</label>
+
+          <div className="flex justify-center  items-center bg-[#465B7E] p-3 rounded-lg">
+            <h1 className="w-full text-white text-3xl pl-10 font-bold">
+              อุปกรณ์ที่ยืม
+            </h1>
+          </div>
+
+          <div className="mt-6 flex">
             <select
-              className="border p-2 bg-cyan-50 rounded-md shadow-md"
+              className="border p-2 bg-white-50 rounded-md shadow-md w-1/4"
               value={academicYear}
               onChange={(e) => setAcademicYear(e.target.value)}
             >
@@ -160,13 +176,14 @@ const EquipmentPage = () => {
               ))}
             </select>
           </div>
-          <div className="bg-cyan-100 mt-6 shadow-lg rounded-lg p-6">
-            <h2 className="text-2xl font-bold mb-6">รายการอุปกรณ์</h2>
+          <div className="bg-cyan-50 mt-6 shadow-lg rounded-lg p-6">
+            {/* <h2 className="text-2xl font-bold mb-6">รายการอุปกรณ์</h2> */}
             {userEquipmentItems.length === 0 ? (
               <div className="text-center text-gray-500 py-8">ไม่มีอุปกรณ์ที่ยืม</div>
             ) : (
               <>
-                <div className="grid grid-cols-4 gap-4 py-2 px-4 border-b font-bold text-gray-700">
+                <div className="grid grid-cols-4 gap-4 py-2 px-4 border-b font-bold bg-[#5a7dbb]  
+                mb-3 rounded-md text-white">
                   <div>รายการ</div>
                   <div className="text-center">ราคา</div>
                   <div className="text-center">จำนวน</div>
@@ -176,7 +193,7 @@ const EquipmentPage = () => {
                   {userEquipmentItems.map((item) => (
                     <div
                       key={item.id}
-                      className="grid grid-cols-4 gap-4 items-center py-2 px-4  rounded-lg shadow-lg bg-cyan-50"
+                      className="grid grid-cols-4 gap-4 items-center py-2 px-4  rounded-lg shadow-lg bg-white"
                     >
                       <div className="flex items-center">
                         {item.imageUrl ? (
@@ -190,19 +207,24 @@ const EquipmentPage = () => {
                             ไม่มีรูปภาพ
                           </div>
                         )}
+
+
                         <div>
                           <h2 className="text-lg font-bold text-gray-800">{item.attributes?.label}</h2>
-                          <p className="text-sm text-gray-500">{item.attributes?.category || "N/A"}</p>
+                          {/* <p className="text-sm text-gray-500">
+                            {item.attributes.categoriesadmin?.data?.attributes?.name || "N/A"}
+                          </p> */}
+
                         </div>
                       </div>
                       <div className="text-center">{item.attributes?.Price} ฿</div>
                       <div className="text-center">{item.attributes?.amount}</div>
-                      <div className="text-center">
+                      <button onClick={() => handleDeleteItem(item.id)}
+                        className="bg-red-500 text-white flex items-center justify-center px-1 py-1 rounded-lg mx-auto">
                         <IoClose
-                          className="text-red-500 text-xl mx-40 cursor-pointer hover:text-red-700"
-                          onClick={() => handleDeleteItem(item.id)}
+                          className="text-white cursor-pointer w-5 h-5"
                         />
-                      </div>
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -211,15 +233,32 @@ const EquipmentPage = () => {
           </div>
 
           {/* ✅ เลือกปีการศึกษาก่อนพิมพ์แบบฟอร์ม */}
-          
 
-          <button
-            className="bg-blue-500 text-white py-2 px-6 mt-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-200"
-            onClick={handleGoToBorrowForm}
-          >
-            พิมพ์แบบฟอร์มยืมอุปกรณ์
-          </button>
+          <div className="flex justify-end">
+            <button
+              className="bg-[#05c452] text-white py-2 px-6 mt-10 rounded-lg shadow-md hover:bg-green-700 transition duration-200"
+              onClick={handleGoToBorrowForm}
+            >
+              พิมพ์แบบฟอร์มยืมอุปกรณ์
+            </button>
+          </div>
         </div>
+
+        {/* ✅ แสดง Loading Overlay พร้อมไอคอนหมุน */}
+        {isLoading && (
+          <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-70 z-50">
+            <motion.div
+              className="flex flex-col items-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <AiOutlineLoading3Quarters className="text-5xl text-blue-500 animate-spin" /> {/* ✅ ไอคอนหมุน */}
+              <p className="text-xl font-bold text-blue-500 mt-3">กำลังโหลด...</p>
+            </motion.div>
+          </div>
+        )}
+
       </Layout>
     </div>
   );

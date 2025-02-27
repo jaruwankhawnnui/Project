@@ -5,9 +5,10 @@ import { FaCheckCircle } from 'react-icons/fa'; // Using Font Awesome icons (ins
 
 const TermsOfServicePage = () => {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 ">
       <Layout>
-        <div className="max-w-4xl mx-auto p-8 bg-white rounded-lg shadow-lg">
+        
+        <div className="max-w-4xl mx-auto p-8 bg-cyan-50 rounded-lg shadow-lg">
           <h1 className="text-4xl font-extrabold mb-8 text-center text-black">กฎในการยืมอุปกรณ์</h1>
           <div className="space-y-8 text-gray-700 leading-relaxed">
             <section>

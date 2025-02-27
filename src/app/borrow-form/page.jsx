@@ -4,11 +4,15 @@ import React, { useEffect, useState, useRef } from "react";
 import Layout from "@/components/Layout";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
+import { AiOutlineLoading3Quarters } from "react-icons/ai"; // ✅ เพิ่มไอคอนโหลด
+import { motion } from "framer-motion";
+
 
 const BorrowFormPage = () => {
   const [borrowData, setBorrowData] = useState([]);
   const [currentDate, setCurrentDate] = useState("");
   const [academicYear, setAcademicYear] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const formRef = useRef();
 
   useEffect(() => {
@@ -36,9 +40,9 @@ const BorrowFormPage = () => {
       const pdf = new jsPDF("p", "mm", "a4"); // ใช้ขนาด A4
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-      
+
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, imgHeight);
-      
+
       return pdf;
     } catch (error) {
       console.error("❌ Error generating PDF:", error);
@@ -53,9 +57,10 @@ const BorrowFormPage = () => {
 
     pdf.save("borrow-form.pdf"); // ดาวน์โหลดไฟล์ PDF
   };
-  
+
 
   const handleSubmitForm = async () => {
+    setIsLoading(true);
     const pdf = await generatePDF();
     if (!pdf) return;
 
@@ -65,7 +70,7 @@ const BorrowFormPage = () => {
 
     try {
       // ✅ อัปโหลด PDF ไปยัง Strapi
-      const uploadResponse = await fetch("http://172.31.0.1:1337/api/upload", {
+      const uploadResponse = await fetch("http://172.21.32.1:1337/api/upload", {
         method: "POST",
         body: formData,
       });
@@ -85,7 +90,7 @@ const BorrowFormPage = () => {
       await Promise.all(
         borrowData.map(async (item) => {
           // ✅ บันทึกข้อมูลการยืม
-          const borrowResponse = await fetch("http://172.31.0.1:1337/api/borrows", {
+          const borrowResponse = await fetch("http://172.21.32.1:1337/api/borrows", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -105,7 +110,7 @@ const BorrowFormPage = () => {
               },
             }),
           });
-        
+
           if (!borrowResponse.ok) {
             throw new Error("Failed to create Borrow record in Strapi");
           }
@@ -113,26 +118,26 @@ const BorrowFormPage = () => {
           console.log(`✅ Borrow record created for ${item.label}`);
 
           // ✅ อัปเดตจำนวนคงเหลือของอุปกรณ์ใน `/api/cartadmins`
-          const inventoryResponse = await fetch(`http://172.31.0.1:1337/api/cartadmins?filters[Label][$eq]=${encodeURIComponent(item.label)}`);
+          const inventoryResponse = await fetch(`http://172.21.32.1:1337/api/cartadmins?filters[Label][$eq]=${encodeURIComponent(item.label)}`);
           const inventoryData = await inventoryResponse.json();
 
           if (inventoryData.data.length === 0) {
             console.error(`❌ ไม่พบอุปกรณ์: ${item.label} ในระบบ`);
             return;
           }
-          
+
           const canvas = await html2canvas(formRef.current, {
             scale: 1,
             backgroundColor: "#ffffff", // เพิ่มพื้นหลังเป็นสีขาว
           });
-          
+
 
           const itemId = inventoryData.data[0].id;
           const currentItem = inventoryData.data[0].attributes;
           const newBorrowedAmount = (currentItem.Borrowed || 0) + item.amount;
           const newRemainingAmount = (currentItem.item || 0) - newBorrowedAmount;
 
-          await fetch(`http://172.31.0.1:1337/api/cartadmins/${itemId}`, {
+          await fetch(`http://172.21.32.1:1337/api/cartadmins/${itemId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -153,6 +158,8 @@ const BorrowFormPage = () => {
     } catch (error) {
       console.error("❌ Error submitting form:", error);
       alert("❌ เกิดข้อผิดพลาดในการส่งแบบฟอร์ม");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -285,6 +292,21 @@ const BorrowFormPage = () => {
               </>
             )}
           </div>
+          {/* ✅ แสดง Loading Overlay พร้อมไอคอนหมุน */}
+          {isLoading && (
+            <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-70 z-50">
+              <motion.div
+                className="flex flex-col items-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <AiOutlineLoading3Quarters className="text-5xl text-blue-500 animate-spin" /> {/* ✅ ไอคอนหมุน */}
+                <p className="text-xl font-bold text-blue-500 mt-3">กำลังโหลด...</p>
+              </motion.div>
+            </div>
+          )}
+
         </div>
       </Layout>
     </div>

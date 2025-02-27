@@ -22,16 +22,16 @@ import Link from 'next/link';
 
 export default async function Home() {
   // Fetch the data from Strapi API
-  const res = await fetch('http://172.31.0.1:1337/api/webnews?populate=*', {
+  const res = await fetch('http://172.21.32.1:1337/api/webnews?populate=*', {
     cache: 'no-store',
   });
   const data = await res.json();
   const webnews = data.data;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cyan-100 to-blue-900 text-white">
+    <div className="min-h-screen bg-gradient-to-b from-white to-cyan-300 text-white">
       {/* Header Section */}
-      <header className="bg-cyan-100 p-4 flex justify-between items-center">
+      <header className="bg-gradient-to-br from-cyan-100 to-[#6EC7E2] p-4 flex justify-between items-center">
         <div className="flex items-center p-2 mx-8">
           {/* Logo */}
           <Image

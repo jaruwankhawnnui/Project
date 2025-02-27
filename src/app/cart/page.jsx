@@ -6,6 +6,10 @@ import { IoClose } from "react-icons/io5";
 import Layout from "@/components/Layout";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { AiOutlineLoading3Quarters } from "react-icons/ai"; // ✅ เพิ่มไอคอนโหลด
+import { motion } from "framer-motion";
 
 const Cart = () => {
   const [items, setItems] = useState([]);
@@ -16,6 +20,7 @@ const Cart = () => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { data: session } = useSession();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchUserItems = async () => {
@@ -27,10 +32,10 @@ const Cart = () => {
       setLoading(true);
       try {
         const response = await fetch(
-          `http://172.31.0.1:1337/api/adds?filters[email][$eq]=${session.user.email}&populate=image`
+          `http://172.21.32.1:1337/api/adds?filters[email][$eq]=${session.user.email}&populate=image`
         );
 
-        
+
         if (response.ok) {
           const data = await response.json();
           const enrichedItems = data.data.map((item) => ({
@@ -93,7 +98,7 @@ const Cart = () => {
 
   const deleteItem = async (id, index) => {
     try {
-      const response = await fetch(`http://172.31.0.1:1337/api/adds/${id}`, {
+      const response = await fetch(`http://172.21.32.1:1337/api/adds/${id}`, {
         method: "DELETE",
       });
 
@@ -114,53 +119,54 @@ const Cart = () => {
   };
 
   const handleBorrowItems = async () => {
+    setIsLoading(true);
     console.log("Starting handleBorrowItems...");
     const borrowedItems = items.filter((_, index) => checkedItems[index]);
     console.log("Borrowed items:", borrowedItems);
-  
+
     if (borrowedItems.length === 0) {
       alert("กรุณาเลือกอุปกรณ์ที่ต้องการยืม");
       return;
     }
-  
+
     try {
       for (const item of borrowedItems) {
         console.log("Processing item:", item);
-  
+
         const imageUrl =
           item.attributes?.image?.data?.length > 0
             ? item.attributes.image.data[0].attributes.url.startsWith("http")
               ? item.attributes.image.data[0].attributes.url
-              : `http://172.31.0.1:1337${item.attributes.image.data[0].attributes.url}`
+              : `http://172.21.32.1:1337${item.attributes.image.data[0].attributes.url}`
             : null;
-  
+
         console.log("Final Image URL:", imageUrl);
-  
+
         // ค้นหาอุปกรณ์ใน Strapi ที่มีชนิดเดียวกัน
         const searchResponse = await fetch(
-          `http://172.31.0.1:1337/api/equipment?filters[label][$eq]=${item.attributes?.label}&populate=image`
+          `http://172.21.32.1:1337/api/equipment?filters[label][$eq]=${item.attributes?.label}&populate=image`
         );
-  
+
         if (!searchResponse.ok) {
           const searchErrorText = await searchResponse.text();
           console.error("Error searching equipment:", searchErrorText);
           alert("เกิดข้อผิดพลาดในการค้นหาอุปกรณ์");
           return;
         }
-  
+
         const searchData = await searchResponse.json();
         console.log("Search result:", searchData);
-  
+
         const existingEquipment = searchData.data[0]; // หากพบอุปกรณ์ชนิดเดียวกัน
         console.log("Existing equipment:", existingEquipment);
-  
+
         if (existingEquipment) {
           // หากมีอุปกรณ์ชนิดเดียวกัน ให้เพิ่มจำนวน
           const updatedAmount = existingEquipment.attributes.amount + item.quantity;
           console.log("Updated amount:", updatedAmount);
-  
+
           const updateResponse = await fetch(
-            `http://172.31.0.1:1337/api/equipment/${existingEquipment.id}`,
+            `http://172.21.32.1:1337/api/equipment/${existingEquipment.id}`,
             {
               method: "PUT",
               headers: {
@@ -173,14 +179,14 @@ const Cart = () => {
               }),
             }
           );
-  
+
           if (!updateResponse.ok) {
             const updateErrorText = await updateResponse.text();
             console.error("Error updating equipment:", updateErrorText);
             alert("เกิดข้อผิดพลาดในการเพิ่มจำนวนอุปกรณ์");
             return;
           }
-  
+
           console.log("Successfully updated equipment:", existingEquipment.id);
         } else {
           // หากไม่มีอุปกรณ์ชนิดเดียวกัน ให้สร้างใหม่
@@ -196,27 +202,27 @@ const Cart = () => {
               return;
             }
           }
-  
+
           let uploadedImageId = null;
           if (imageUrl) {
-            const imageResponse = await fetch("http://172.31.0.1:1337/api/upload", {
+            const imageResponse = await fetch("http://172.21.32.1:1337/api/upload", {
               method: "POST",
               body: formData,
             });
-  
+
             if (!imageResponse.ok) {
               const imageErrorText = await imageResponse.text();
               console.error("Image upload error:", imageErrorText);
               alert(`เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ: ${imageErrorText}`);
               return;
             }
-  
+
             const imageData = await imageResponse.json();
             uploadedImageId = imageData[0]?.id;
             console.log("Uploaded image ID:", uploadedImageId);
           }
-  
-          const createResponse = await fetch("http://172.31.0.1:1337/api/equipment", {
+
+          const createResponse = await fetch("http://172.21.32.1:1337/api/equipment", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -233,26 +239,28 @@ const Cart = () => {
               },
             }),
           });
-  
+
           if (!createResponse.ok) {
             const errorText = await createResponse.text();
             console.error("Error creating equipment:", errorText);
             alert(`เกิดข้อผิดพลาดในการบันทึกข้อมูล: ${errorText}`);
             return;
           }
-  
+
           console.log("Successfully created new equipment.");
         }
       }
-  
+
       alert("การยืมอุปกรณ์สำเร็จ");
       router.push("/equipment");
     } catch (error) {
       console.error("Error saving items:", error);
       alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+    } finally {
+      setIsLoading(false);
     }
   };
-  
+
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -298,51 +306,73 @@ const Cart = () => {
                       </div>
                       <div className="flex items-center gap-1 px-6">
                         <button
-                          className="bg-gray-300 hover:bg-gray-400 px-2 py-1 rounded-l text-sm"
+                          className="bg-gray-300 hover:bg-gray-400 px-1  rounded-l"
                           onClick={() => decreaseQuantity(index)}
                         >
-                          -
+                          <FontAwesomeIcon icon={faMinus} className="w-3 h-3" />
                         </button>
                         <span className="px-4">{item.quantity}</span>
                         <button
-                          className="bg-gray-300 hover:bg-gray-400 px-2 py-1 rounded-r text-sm"
+                          className="bg-gray-300 hover:bg-gray-400 px-1  rounded-r"
                           onClick={() => increaseQuantity(index)}
                         >
-                          +
+                          <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
                         </button>
                       </div>
-                      <div className="text-gray-800 text-sm px-8">{totalPrice} ฿</div>
-                      <IoClose
-                        className="text-red-500 cursor-pointer hover:text-red-600"
-                        onClick={() => deleteItem(item.id, index)}
-                      />
+                      <div className="text-gray-800 font-bold text-md px-8">{totalPrice} ฿</div>
+
+                      <button onClick={() => deleteItem(item.id, index)}
+                        className="bg-red-500 text-white flex items-center justify-center px-1 py-1 rounded-lg mx-auto">
+                        <IoClose
+                          className="text-white cursor-pointer w-5 h-5"
+                        />
+                      </button>
+
                     </div>
                   );
                 })}
               </div>
-              <div className="flex justify-between items-center bg-cyan-50 p-4 rounded-lg mt-4 shadow-lg">
+              <div className="flex justify-between items-center bg-[#4691D3] text-white p-4 rounded-lg mt-4 shadow-lg">
                 <div onClick={handleSelectAllChange} className="flex items-center cursor-pointer">
                   {isSelectAllChecked ? (
                     <RiCheckboxLine className="w-6 h-6 text-green-500" />
                   ) : (
                     <RiCheckboxBlankLine className="w-6 h-6" />
                   )}
-                  <span className="ml-2 text-gray-800 font-medium">เลือกทั้งหมด</span>
+                  <span className="ml-2 text-white font-medium">เลือกทั้งหมด</span>
                 </div>
                 <div className="flex items-center gap-6">
-                  <span className="text-gray-800 font-medium">รวม: {checkedCount} ชิ้น</span>
-                  <span className="text-gray-800 font-bold">ราคารวมทั้งหมด: {totalCheckedPrice} ฿</span>
+                  <span className="text-white font-medium">รวม: {checkedCount} ชิ้น</span>
+                  <span className="text-white font-bold">ราคารวมทั้งหมด: {totalCheckedPrice} ฿</span>
                   <button
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+                    className="bg-green-500  hover:bg-green-600 text-white px-4 py-2 rounded-lg"
                     onClick={handleBorrowItems}
                   >
                     ยืมอุปกรณ์
                   </button>
+                  {/* ✅ แสดง Loading Overlay พร้อมไอคอนหมุน */}
+                  {isLoading && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-70 z-50">
+                      <motion.div
+                        className="flex flex-col items-center"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <AiOutlineLoading3Quarters className="text-5xl text-blue-500 animate-spin" /> {/* ✅ ไอคอนหมุน */}
+                        <p className="text-xl font-bold text-blue-500 mt-3">กำลังโหลด...</p>
+                      </motion.div>
+                    </div>
+                  )}
+
                 </div>
+
               </div>
             </div>
+
           )}
         </div>
+
       </Layout>
     </div>
   );

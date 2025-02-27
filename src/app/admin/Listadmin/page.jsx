@@ -20,8 +20,8 @@ const InventoryList = () => {
     const fetchData = async () => {
       try {
         const [inventoryRes, borrowRes] = await Promise.all([
-          axios.get("http://172.31.0.1:1337/api/cartadmins?populate=*"),
-          axios.get("http://172.31.0.1:1337/api/borrows"),
+          axios.get("http://172.21.32.1:1337/api/cartadmins?populate=*"),
+          axios.get("http://172.21.32.1:1337/api/borrows"),
         ]);
 
         console.log("Fetched inventory data:", inventoryRes.data);
@@ -92,7 +92,7 @@ const InventoryList = () => {
     if (!selectedItem) return;
 
     try {
-      await axios.put(`http://172.31.0.1:1337/api/cartadmins/${selectedItem.id}`, {
+      await axios.put(`http://172.21.32.1:1337/api/cartadmins/${selectedItem.id}`, {
         data: { item: newTotalAmount },
       });
 
@@ -158,7 +158,7 @@ const InventoryList = () => {
                               src={
                                 item.image.startsWith("http")
                                   ? item.image
-                                  : `http://172.31.0.1:1337${item.image}`
+                                  : `http://172.21.32.1:1337${item.image}`
                               }
                               className="w-20 h-20 sm:w-32 sm:h-32 object-cover rounded"
                             />

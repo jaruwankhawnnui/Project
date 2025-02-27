@@ -4,6 +4,8 @@ import Layout from "@/components/Layout";
 import { TiShoppingCart } from "react-icons/ti";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { AiOutlineLoading3Quarters } from "react-icons/ai"; // ✅ เพิ่มไอคอนโหลด
+import { motion } from "framer-motion";
 
 const Card = ({ params }) => {
   const { data: session } = useSession();
@@ -18,7 +20,7 @@ const Card = ({ params }) => {
     if (id) {
       const fetchItemData = async () => {
         try {
-          const response = await fetch(`http://172.31.0.1:1337/api/cartadmins/${id}?populate=*`);
+          const response = await fetch(`http://172.21.32.1:1337/api/cartadmins/${id}?populate=*`);
           if (!response.ok) {
             throw new Error("Failed to fetch item data");
           }
@@ -43,6 +45,7 @@ const Card = ({ params }) => {
   };
 
   const addToCart = async () => {
+    setIsLoading(true);
     try {
       const formData = new FormData();
 
@@ -65,15 +68,15 @@ const Card = ({ params }) => {
         })
       );
 
-      const response = await fetch(`http://172.31.0.1:1337/api/adds`, {
+      const response = await fetch(`http://172.21.32.1:1337/api/adds`, {
         method: "POST",
         body: formData,
       });
 
       if (response.ok) {
-        const result = await response.json();
-        console.log("เพิ่มข้อมูลใน Strapi สำเร็จ:", result);
-        alert("เพิ่มข้อมูลลงในรถเข็นสำเร็จ");
+        console.log("เพิ่มข้อมูลใน Strapi สำเร็จ");
+        setIsLoading(false); // อัปเดต state ให้หยุด loading
+
       } else {
         const errorText = await response.text();
         alert(`เกิดข้อผิดพลาด: ${errorText}`);
@@ -81,6 +84,8 @@ const Card = ({ params }) => {
     } catch (error) {
       console.error("Error adding to Strapi:", error);
       alert("เกิดข้อผิดพลาด: ไม่สามารถเพิ่มอุปกรณ์ลงในรถเข็นได้");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -166,9 +171,24 @@ const Card = ({ params }) => {
             {selectedItem.attributes?.Detail || "ไม่มีรายละเอียดเพิ่มเติม"}
           </p>
         </div>
+        {/* ✅ แสดง Loading Overlay พร้อมไอคอนหมุน */}
+        {isLoading && (
+          <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-70 z-50">
+            <motion.div
+              className="flex flex-col items-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <AiOutlineLoading3Quarters className="text-5xl text-blue-500 animate-spin" /> {/* ✅ ไอคอนหมุน */}
+              <p className="text-xl font-bold text-blue-500 mt-3">กำลังโหลด...</p>
+            </motion.div>
+          </div>
+        )}
+
       </Layout>
     </div>
   );
 };
 
-export default Card;
+export default Card; 
