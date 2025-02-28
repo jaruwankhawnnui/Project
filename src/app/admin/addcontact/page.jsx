@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import Headeradmin from "@/components/Headeradmin";
 
-const AddContact = ({ onNewItemAdded }) => {
+const AddContact = () => {
   const [formData, setFormData] = useState({
     phone: "",
     email: "",
@@ -41,7 +41,7 @@ const AddContact = ({ onNewItemAdded }) => {
         }
       );
       console.log("Success:", response.data);
-      onNewItemAdded(); // ทำงานหลังจากเพิ่มข้อมูลสำเร็จ
+      // onNewItemAdded(); // ทำงานหลังจากเพิ่มข้อมูลสำเร็จ
 
       // Reset form fields after successful submit
       setFormData({
