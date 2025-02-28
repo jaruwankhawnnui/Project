@@ -43,20 +43,22 @@ export const authConfig = {
     async redirect({ url, baseUrl }) {
       return "http://localhost:3000/homepage";
     },
-    session({ session, token }) {
+    session({ session, token }: { session: any; token: any }) {
       if (session.user) {
-        session.user.role = token.role ?? "user"; 
-        session.user.nickname = token.nickname ?? "";
+        session.user.role = (token.role as string) ?? "user"; 
+        session.user.nickname = (token.nickname as string) ?? "";
       }
       return session;
     },
-    jwt({ token, user }) {
+    
+    jwt({ token, user }: { token: any; user?: any }) {
       if (user) {
-        token.role = user.role ?? "user";
-        token.nickname = user.nickname ?? "";
+        token.role = (user.role as string) ?? "user";
+        token.nickname = (user.nickname as string) ?? "";
       }
       return token;
     },
+    
   },
   debug: true,
   secret: "dcefkpowelkrkmpeofkvmperfk"

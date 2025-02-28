@@ -6,13 +6,13 @@ declare module "next-auth" {
       id: string;
       name: string;
       email: string;
-      role?: string;
-      nickname?: string;
+      role: string;
+      nickname: string;
     };
   }
 
   interface JWT {
-    role?: string;
-    nickname?: string;
+    role: string;
+    nickname: string;
   }
 }
