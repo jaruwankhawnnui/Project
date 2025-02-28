@@ -43,14 +43,18 @@ export const authConfig = {
     async redirect({ url, baseUrl }) {
       return "http://localhost:3000/homepage";
     },
-    session({ session, user, token }) {
-      session.user.role = token.role
-      session.user.nickname = token.nickname
+    session({ session, token }) {
+      if (session.user) {
+        session.user.role = token.role ?? "user"; 
+        session.user.nickname = token.nickname ?? "";
+      }
       return session;
     },
-    jwt({ token, user, account, profile, isNewUser }) {
-      if(user) token.role = user.role
-      if(user) token.nickname = user.nickname
+    jwt({ token, user }) {
+      if (user) {
+        token.role = user.role ?? "user";
+        token.nickname = user.nickname ?? "";
+      }
       return token;
     },
   },
