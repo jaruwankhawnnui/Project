@@ -144,20 +144,19 @@
 
 
 "use client";
+
 import dynamic from "next/dynamic";
 import { signIn } from "next-auth/react";
 import axios from "axios";
 
 
 const Player = dynamic(() => import("@lottiefiles/react-lottie-player"), { ssr: false });
-
-
 export default function LoginForm2() {
     const saveUserToStrapi = async (userData) => {
         try {
             // ตรวจสอบว่าผู้ใช้มีอยู่ใน Strapi หรือไม่ (โดยใช้ email เป็นตัวระบุ)
             const checkResponse = await axios.get(
-                `http://localhost:1337/api/user-logins?filters[Email][$eq]=${encodeURIComponent(userData.email)}`
+                `https://coe-hardware-lab-website-ievu.onrender.com/api/user-logins?filters[Email][$eq]=${encodeURIComponent(userData.email)}`
             );
             const existingUser = checkResponse.data.data;
 
@@ -167,7 +166,7 @@ export default function LoginForm2() {
             }
 
             // หากไม่มีข้อมูลผู้ใช้ในระบบ ให้บันทึกข้อมูลใหม่
-            const response = await axios.post("http://localhost:1337/api/user-logins", {
+            const response = await axios.post("https://coe-hardware-lab-website-ievu.onrender.com/api/user-logins", {
                 data: {
                     name: userData.name, // ต้องตรงกับฟิลด์ "name" บน Strapi
                     Email: userData.email, // ต้องตรงกับฟิลด์ "Email" บน Strapi
