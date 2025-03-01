@@ -51,7 +51,7 @@ export default function LoginForm2() {
                         className="mt-10 p-4 m-auto bg-blue-900 text-white rounded-lg shadow hover:shadow-lg hover:scale-105 transition-all w-full max-w-60"
                         onClick={async () => {
                             const result = await signIn("authentik", {
-                                callbackUrl: "http://localhost:3000/api/auth/callback/authentik",
+                                callbackUrl: "https://coe-hardware-lab-website-ievu.onrender.com/api/auth/callback/authentik",
                             });
 
                             if (result?.ok) {
@@ -80,7 +80,7 @@ export default function LoginForm2() {
                     type="button"
                     className="mt-4 p-4 m-auto bg-red-600 text-white rounded-lg shadow hover:shadow-lg hover:scale-105 transition-all w-full max-w-60 flex items-center justify-center gap-2"
                     onClick={() => {
-                        window.location.href = "http://localhost:3000/admin/loginadmin";
+                        window.location.href = "https://coe-hardware-lab-website-ievu.onrender.com/admin/loginadmin";
                     }}
                     >
                         
