@@ -16,7 +16,7 @@ const Contact = () => {
   // ดึงข้อมูลการติดต่อจาก API
   const fetchContact = async () => {
     try {
-      const response = await axios.get("https://coe-hardware-lab-website-ievu.onrender.com//api/addcontacts/14?populate=*");
+      const response = await axios.get("https://coe-hardware-lab-website-ievu.onrender.com/api/addcontacts/14?populate=*");
       setContact(response.data.data);
     } catch (error) {
       console.error("❌ Error fetching contact:", error);

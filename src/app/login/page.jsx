@@ -75,7 +75,7 @@
 //           console.error("Error saving user to Strapi:", error.response?.data || error.message);
 //         }
 //       };
-      
+
 
 //     return (
 //         <div className="m-auto md:px-24 xl:px-72 2xl:px-96 md:pt-[6rem] w-full h-screen">
@@ -154,17 +154,17 @@ export default function LoginForm2() {
         try {
             // ตรวจสอบว่าผู้ใช้มีอยู่ใน Strapi หรือไม่ (โดยใช้ email เป็นตัวระบุ)
             const checkResponse = await axios.get(
-                `http://localhost:1337/api/user-logins?filters[Email][$eq]=${encodeURIComponent(userData.email)}`
+                `https://coe-hardware-lab-website-ievu.onrender.com/api/user-logins?filters[Email][$eq]=${encodeURIComponent(userData.email)}`
             );
             const existingUser = checkResponse.data.data;
-    
+
             if (existingUser && existingUser.length > 0) {
                 console.log("User already exists in Strapi:", existingUser);
                 return; // ข้ามการบันทึกข้อมูลใหม่ หากพบผู้ใช้แล้ว
             }
-    
+
             // หากไม่มีข้อมูลผู้ใช้ในระบบ ให้บันทึกข้อมูลใหม่
-            const response = await axios.post("http://localhost:1337/api/user-logins", {
+            const response = await axios.post("https://coe-hardware-lab-website-ievu.onrender.com/api/user-logins", {
                 data: {
                     name: userData.name, // ต้องตรงกับฟิลด์ "name" บน Strapi
                     Email: userData.email, // ต้องตรงกับฟิลด์ "Email" บน Strapi
@@ -176,7 +176,7 @@ export default function LoginForm2() {
             console.error("Error saving user to Strapi:", error.response?.data || error.message);
         }
     };
-    
+
     return (
         <div className="m-auto md:px-24 xl:px-72 2xl:px-96 md:pt-[6rem] w-full h-screen">
             <div className="relative grid grid-cols-1 md:grid-rows-1 md:grid-cols-7 h-full md:h-[26rem] lg:h-[32rem] rounded-lg border bg-sky-100">
@@ -220,14 +220,14 @@ export default function LoginForm2() {
 
                     {/* Google Login Button */}
                     <button
-                    type="button"
-                    className="mt-4 p-4 m-auto bg-red-600 text-white rounded-lg shadow hover:shadow-lg hover:scale-105 transition-all w-full max-w-60 flex items-center justify-center gap-2"
-                    onClick={() => {
-                        window.location.href = "http://localhost:3000/admin/loginadmin";
-                    }}
+                        type="button"
+                        className="mt-4 p-4 m-auto bg-red-600 text-white rounded-lg shadow hover:shadow-lg hover:scale-105 transition-all w-full max-w-60 flex items-center justify-center gap-2"
+                        onClick={() => {
+                            window.location.href = "http://localhost:3000/admin/loginadmin";
+                        }}
                     >
-                        
-                   Log in with administrator
+
+                        Log in with administrator
                     </button>
 
                     <div className="md:hidden m-auto md:col-span-4 rounded-l-lg">
