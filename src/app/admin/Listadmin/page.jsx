@@ -158,7 +158,7 @@ const InventoryList = () => {
                               src={
                                 item.image.startsWith("http")
                                   ? item.image
-                                  : `https://coe-hardware-lab-website-ievu.onrender.com${item.image}`
+                                  : `https://coe-hardware-lab-website-ievu.onrender.com/${item.image}`
                               }
                               className="w-20 h-20 sm:w-32 sm:h-32 object-cover rounded"
                             />

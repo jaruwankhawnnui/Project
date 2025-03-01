@@ -20,7 +20,7 @@ const Card = ({ params }) => {
     if (id) {
       const fetchItemData = async () => {
         try {
-          const response = await fetch(`http://172.21.32.1:1337/api/cartadmins/${id}?populate=*`);
+          const response = await fetch(`https://coe-hardware-lab-website-ievu.onrender.com/api/cartadmins/${id}?populate=*`);
           if (!response.ok) {
             throw new Error("Failed to fetch item data");
           }
@@ -68,7 +68,7 @@ const Card = ({ params }) => {
         })
       );
 
-      const response = await fetch(`http://172.21.32.1:1337/api/adds`, {
+      const response = await fetch(`https://coe-hardware-lab-website-ievu.onrender.com/api/adds`, {
         method: "POST",
         body: formData,
       });

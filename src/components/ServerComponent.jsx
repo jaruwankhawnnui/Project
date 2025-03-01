@@ -7,5 +7,7 @@ export async function getSession() {
   if (!session?.user) {
     redirect("/");
   }
+
+   
   return session;
 }

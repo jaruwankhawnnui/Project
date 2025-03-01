@@ -23,7 +23,7 @@ const EquipmentPage = () => {
     const fetchUserEquipmentItems = async () => {
       try {
         const response = await fetch(
-          `http://172.21.32.1:1337/api/equipment?filters[email][$eq]=${session.user.email}&populate=image`
+          `https://coe-hardware-lab-website-ievu.onrender.com/api/equipment?filters[email][$eq]=${session.user.email}&populate=image`
         );
         if (response.ok) {
           const data = await response.json();
@@ -34,7 +34,7 @@ const EquipmentPage = () => {
               item.attributes.image?.data?.length > 0
                 ? item.attributes.image.data[0].attributes.url.startsWith("http")
                   ? item.attributes.image.data[0].attributes.url
-                  : `http://172.21.32.1:1337${item.attributes.image.data[0].attributes.url}`
+                  : `https://coe-hardware-lab-website-ievu.onrender.com/${item.attributes.image.data[0].attributes.url}`
                 : null,
           }));
           setUserEquipmentItems(items);
@@ -53,7 +53,7 @@ const EquipmentPage = () => {
     // ✅ ดึงข้อมูลปีการศึกษาจาก /api/Years
     const fetchAcademicYears = async () => {
       try {
-        const response = await fetch("http://172.21.32.1:1337/api/Years");
+        const response = await fetch("https://coe-hardware-lab-website-ievu.onrender.com/api/Years");
         if (response.ok) {
           const data = await response.json();
           const Years = data.data.map((year) => year.attributes.Year);
@@ -72,7 +72,7 @@ const EquipmentPage = () => {
 
   const handleDeleteItem = async (id) => {
     try {
-      const response = await fetch(`http://172.21.32.1:1337/api/equipment/${id}`, {
+      const response = await fetch(`https://coe-hardware-lab-website-ievu.onrender.com/api/equipment/${id}`, {
         method: "DELETE",
       });
 
@@ -127,7 +127,7 @@ const EquipmentPage = () => {
 
       // ✅ อัปเดตอุปกรณ์ที่เลือกใน Strapi โดยเพิ่มปีการศึกษา
       const updateEquipmentPromises = userEquipmentItems.map((item) =>
-        fetch(`http://172.21.32.1:1337/api/equipment/${item.id}`, {
+        fetch(`https://coe-hardware-lab-website-ievu.onrender.com/api/equipment/${item.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",

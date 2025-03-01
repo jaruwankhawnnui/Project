@@ -20,8 +20,8 @@ const HardwareStock = () => {
     const fetchStockAndBorrowedItems = async () => {
       setLoading(true);
       try {
-        const stockResponse = await fetch("https://coe-hardware-lab-website-ievu.onrender.com/api/stockitems?populate=*");
-        const borrowedResponse = await fetch("https://coe-hardware-lab-website-ievu.onrender.com/api/borroweditems?populate=*");
+        const stockResponse = await fetch("http://172.19.32.1:1337/api/stockitems?populate=*");
+        const borrowedResponse = await fetch("http://172.19.32.1:1337/api/borroweditems?populate=*");
 
         if (stockResponse.ok && borrowedResponse.ok) {
           const stockData = await stockResponse.json();
@@ -44,7 +44,7 @@ const HardwareStock = () => {
   // Handle borrow action
   const handleBorrowItem = async () => {
     try {
-      const response = await fetch("https://coe-hardware-lab-website-ievu.onrender.com/api/borroweditems", {
+      const response = await fetch("http://172.19.32.1:1337/api/borroweditems", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -74,7 +74,7 @@ const HardwareStock = () => {
   // Handle return action
   const handleReturnItem = async (id) => {
     try {
-      const response = await fetch(`https://coe-hardware-lab-website-ievu.onrender.com/api/borroweditems/${id}`, {
+      const response = await fetch(`http://172.19.32.1:1337/api/borroweditems/${id}`, {
         method: "DELETE",
       });
 

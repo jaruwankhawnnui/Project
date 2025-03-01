@@ -70,7 +70,7 @@ const BorrowFormPage = () => {
 
     try {
       // ✅ อัปโหลด PDF ไปยัง Strapi
-      const uploadResponse = await fetch("http://172.21.32.1:1337/api/upload", {
+      const uploadResponse = await fetch("https://coe-hardware-lab-website-ievu.onrender.com/api/upload", {
         method: "POST",
         body: formData,
       });
@@ -90,7 +90,7 @@ const BorrowFormPage = () => {
       await Promise.all(
         borrowData.map(async (item) => {
           // ✅ บันทึกข้อมูลการยืม
-          const borrowResponse = await fetch("http://172.21.32.1:1337/api/borrows", {
+          const borrowResponse = await fetch("https://coe-hardware-lab-website-ievu.onrender.com/api/borrows", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -118,7 +118,7 @@ const BorrowFormPage = () => {
           console.log(`✅ Borrow record created for ${item.label}`);
 
           // ✅ อัปเดตจำนวนคงเหลือของอุปกรณ์ใน `/api/cartadmins`
-          const inventoryResponse = await fetch(`http://172.21.32.1:1337/api/cartadmins?filters[Label][$eq]=${encodeURIComponent(item.label)}`);
+          const inventoryResponse = await fetch(`https://coe-hardware-lab-website-ievu.onrender.com/api/cartadmins?filters[Label][$eq]=${encodeURIComponent(item.label)}`);
           const inventoryData = await inventoryResponse.json();
 
           if (inventoryData.data.length === 0) {
@@ -137,7 +137,7 @@ const BorrowFormPage = () => {
           const newBorrowedAmount = (currentItem.Borrowed || 0) + item.amount;
           const newRemainingAmount = (currentItem.item || 0) - newBorrowedAmount;
 
-          await fetch(`http://172.21.32.1:1337/api/cartadmins/${itemId}`, {
+          await fetch(`https://coe-hardware-lab-website-ievu.onrender.com/api/cartadmins/${itemId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
