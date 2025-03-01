@@ -8,7 +8,7 @@ import { FaUserCircle } from "react-icons/fa";
 import { AiOutlineLoading3Quarters } from "react-icons/ai"; // ✅ เพิ่มไอคอนโหลด
 import { motion } from "framer-motion";
 
-const API_URL = "http://172.21.32.1:1337/api/cartadmins?populate=*&pagination[pageSize]=100"; // ✅ โหลดข้อมูลมากกว่า 25 รายการ
+const API_URL = "https://coe-hardware-lab-website-ievu.onrender.com/api/cartadmins?populate=*&pagination[pageSize]=100"; // ✅ โหลดข้อมูลมากกว่า 25 รายการ
 
 const Home = () => {
   const { data: session, status } = useSession();

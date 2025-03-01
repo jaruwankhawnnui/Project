@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export default async function Home() {
   // Fetch the data from Strapi API
-  const res = await fetch('http://172.19.32.1:1337/api/webnews?populate=*', {
+  const res = await fetch('https://coe-hardware-lab-website-ievu.onrender.com/api/webnews?populate=*', {
     cache: 'no-store',
   });
   const data = await res.json();

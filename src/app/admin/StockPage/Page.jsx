@@ -11,7 +11,7 @@ const StockPage = () => {
   useEffect(() => {
     const fetchStockItems = async () => {
       try {
-        const response = await fetch("http://172.19.32.1:1337/api/equipment?populate=image");
+        const response = await fetch("https://coe-hardware-lab-website-ievu.onrender.com/api/equipment?populate=image");
         if (response.ok) {
           const data = await response.json();
           const items = data.data.map((item) => ({
@@ -21,7 +21,7 @@ const StockPage = () => {
               item.attributes.image?.data?.length > 0
                 ? item.attributes.image.data[0].attributes.url.startsWith("http")
                   ? item.attributes.image.data[0].attributes.url
-                  : `http://172.19.32.1:1337${item.attributes.image.data[0].attributes.url}`
+                  : `https://coe-hardware-lab-website-ievu.onrender.com${item.attributes.image.data[0].attributes.url}`
                 : null,
           }));
           setEquipmentItems(items);
@@ -39,7 +39,7 @@ const StockPage = () => {
   // อัปเดตจำนวนอุปกรณ์ในสต๊อก
   const handleUpdateStock = async (id, newAmount) => {
     try {
-      const response = await fetch(`http://172.19.32.1:1337/api/equipment/${id}`, {
+      const response = await fetch(`https://coe-hardware-lab-website-ievu.onrender.com/api/equipment/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

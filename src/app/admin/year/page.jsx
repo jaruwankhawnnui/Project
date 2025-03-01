@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Headeradmin from "@/components/Headeradmin";
 
-const API_URL = 'http://172.21.32.1:1337/api/Years?pagination[pageSize]=100'; // ✅ ดึงข้อมูลมากกว่า 25 รายการ
+const API_URL = 'https://coe-hardware-lab-website-ievu.onrender.com/api/Years?pagination[pageSize]=100'; // ✅ ดึงข้อมูลมากกว่า 25 รายการ
 
 const CreateAcademicYear = () => {
   const [Year, setYear] = useState('');
@@ -39,7 +39,7 @@ const CreateAcademicYear = () => {
       console.log("📌 Sending data to Strapi:", { data: { Year: Year } });
 
       const response = await axios.post(
-        'http://172.21.32.1:1337/api/Years',
+        'https://coe-hardware-lab-website-ievu.onrender.com/api/Years',
         { data: { Year: Year } },
         {
           headers: {

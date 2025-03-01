@@ -14,7 +14,7 @@ const LoginAdmin = () => {
 
     try {
       // Step 1: Authenticate user and get JWT token
-      const response = await fetch("http://172.21.32.1:1337/api/auth/local", {
+      const response = await fetch("https://coe-hardware-lab-website-ievu.onrender.com/api/auth/local", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -33,7 +33,7 @@ const LoginAdmin = () => {
 
         // Step 2: Use the token to fetch user details including role
         const userResponse = await fetch(
-          "http://172.21.32.1:1337/api/users/me?populate=role",
+          "https://coe-hardware-lab-website-ievu.onrender.com/api/users/me?populate=role",
           {
             method: "GET",
             headers: {

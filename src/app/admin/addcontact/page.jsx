@@ -30,7 +30,7 @@ const AddContact = () => {
 
     try {
       const response = await axios.put(
-        "http://172.19.32.1:1337/api/addcontacts/14", // URL ของ API สำหรับเพิ่มข้อมูล
+        "https://coe-hardware-lab-website-ievu.onrender.com/api/addcontacts/14", // URL ของ API สำหรับเพิ่มข้อมูล
         {
           data: contactData,
         },

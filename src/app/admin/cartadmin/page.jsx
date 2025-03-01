@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Headeradmin from "@/components/Headeradmin";
 
-const API_URL = "http://172.21.32.1:1337/api/cartadmins";
-const CATEGORY_URL = "http://172.21.32.1:1337/api/categoriesadmins?populate=*&pagination[pageSize]=100"; // ✅ ดึงหมวดหมู่มากกว่า 25 รายการ
+const API_URL = "https://coe-hardware-lab-website-ievu.onrender.com/api/cartadmins";
+const CATEGORY_URL = "https://coe-hardware-lab-website-ievu.onrender.com/api/categoriesadmins?populate=*&pagination[pageSize]=100"; // ✅ ดึงหมวดหมู่มากกว่า 25 รายการ
 
 const Cartadmin = () => {
   const [categories, setCategories] = useState([]);

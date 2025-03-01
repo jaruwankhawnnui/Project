@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Headeradmin from "@/components/Headeradmin";
 
-const API_URL = "http://172.21.32.1:1337/api/categoriesadmins"; // URL ของ Strapi
+const API_URL = "https://coe-hardware-lab-website-ievu.onrender.com/api/categoriesadmins"; // URL ของ Strapi
 
 const CreateCategory = () => {
   const [label, setLabel] = useState("");

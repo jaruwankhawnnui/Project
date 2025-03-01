@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Headeradmin from "@/components/Headeradmin";
 
-const API_URL = "http://172.21.32.1:1337/api/webnews"; // URL ของ Strapi
+const API_URL = "https://coe-hardware-lab-website-ievu.onrender.com/api/webnews"; // URL ของ Strapi
 
 const CommentPage = () => {
   const [comments, setComments] = useState([]);

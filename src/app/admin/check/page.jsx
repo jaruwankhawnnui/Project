@@ -16,7 +16,7 @@ export default function ApprovalPage() {
   useEffect(() => {
     const fetchBorrowRequests = async () => {
       try {
-        const response = await fetch(`http://172.21.32.1:1337/api/borrows?populate=*`);
+        const response = await fetch(`https://coe-hardware-lab-website-ievu.onrender.com/api/borrows?populate=*`);
         if (response.ok) {
           const data = await response.json();
           const formattedRequests = data.data.map((item) => ({
@@ -50,7 +50,7 @@ export default function ApprovalPage() {
 
   const updateStatus = async (id, newStatus) => {
     try {
-      const response = await fetch(`http://172.21.32.1:1337/api/borrows/${id}`, {
+      const response = await fetch(`https://coe-hardware-lab-website-ievu.onrender.com/api/borrows/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ data: { status: newStatus } }),
@@ -71,7 +71,7 @@ export default function ApprovalPage() {
   };
   const viewPDF = async (id) => {
     try {
-      const response = await fetch(`http://172.21.32.1:1337/api/borrows/${id}?populate=form`);
+      const response = await fetch(`https://coe-hardware-lab-website-ievu.onrender.com/api/borrows/${id}?populate=form`);
       if (response.ok) {
         const data = await response.json();
         console.log("Borrow Data:", data);

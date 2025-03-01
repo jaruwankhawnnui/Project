@@ -14,7 +14,7 @@ const RentalInfo = () => {
 
       try {
         const response = await fetch(
-          `http://172.21.32.1:1337/api/borrows?filters[email][$eq]=${session.user.email}&populate=*`
+          `https://coe-hardware-lab-website-ievu.onrender.com/api/borrows?filters[email][$eq]=${session.user.email}&populate=*`
         );
 
         if (response.ok) {
@@ -42,7 +42,7 @@ const RentalInfo = () => {
 
   const updateStatusInBorrow = async (id, status) => {
     try {
-      await fetch(`http://172.21.32.1:1337/api/borrows/${id}`, {
+      await fetch(`https://coe-hardware-lab-website-ievu.onrender.com/api/borrows/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
