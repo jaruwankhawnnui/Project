@@ -41,7 +41,7 @@ export const authConfig = {
       return true;
     },
     async redirect({ url, baseUrl }) {
-      return "http://20.210.109.247/homepage";
+      return "https://hardware-coe.maliwan.cloud/homepage";
     },
     session({ session, token }: { session: any; token: any }) {
       if (session.user) {

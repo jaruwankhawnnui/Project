@@ -154,7 +154,7 @@ const BorrowFormPage = () => {
         })
       );
 
-      alert("✅ ส่งแบบฟอร์มสำเร็จ และข้อมูลการยืมถูกบันทึกใน Strapi!");
+      alert("✅ ส่งแบบฟอร์มสำเร็จ");
     } catch (error) {
       console.error("❌ Error submitting form:", error);
       alert("❌ เกิดข้อผิดพลาดในการส่งแบบฟอร์ม");
