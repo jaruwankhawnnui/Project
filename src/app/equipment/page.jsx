@@ -154,7 +154,7 @@ const EquipmentPage = () => {
   return (
     <div className="bg-gray-100 min-h-screen pb-32">
       <Layout>
-        <div className="container mx-auto mt-10  ">
+        <div className="container mt-10 mx-auto px-4 sm:px-4 lg:px-4 pb-8 ">
 
           <div className="flex justify-center  items-center bg-[#465B7E] p-3 rounded-lg">
             <h1 className="w-full text-white text-3xl pl-10 font-bold">
@@ -176,14 +176,14 @@ const EquipmentPage = () => {
               ))}
             </select>
           </div>
-          <div className="bg-cyan-50 mt-6 shadow-lg rounded-lg p-6">
+          <div className="bg-cyan-50 mt-6 shadow-lg rounded-lg p-6 overflow-x-auto">
             {/* <h2 className="text-2xl font-bold mb-6">รายการอุปกรณ์</h2> */}
             {userEquipmentItems.length === 0 ? (
               <div className="text-center text-gray-500 py-8">ไม่มีอุปกรณ์ที่ยืม</div>
             ) : (
               <>
                 <div className="grid grid-cols-4 gap-4 py-2 px-4 border-b font-bold bg-[#5a7dbb]  
-                mb-3 rounded-md text-white">
+                mb-3 rounded-md text-white min-w-[900px]">
                   <div>รายการ</div>
                   <div className="text-center">ราคา</div>
                   <div className="text-center">จำนวน</div>
@@ -193,7 +193,7 @@ const EquipmentPage = () => {
                   {userEquipmentItems.map((item) => (
                     <div
                       key={item.id}
-                      className="grid grid-cols-4 gap-4 items-center py-2 px-4  rounded-lg shadow-lg bg-white"
+                      className="grid grid-cols-4 gap-4 items-center py-2 px-4  rounded-lg shadow-lg bg-white min-w-[900px]"
                     >
                       <div className="flex items-center">
                         {item.imageUrl ? (
