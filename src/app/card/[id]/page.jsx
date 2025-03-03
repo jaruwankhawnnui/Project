@@ -74,7 +74,7 @@ const Card = ({ params }) => {
       });
 
       if (response.ok) {
-        console.log("เพิ่มข้อมูลใน Strapi สำเร็จ");
+        console.log("เพิ่มข้อมูลใน Strapi สำเร็จ",response);
         setIsLoading(false); // อัปเดต state ให้หยุด loading
 
       } else {

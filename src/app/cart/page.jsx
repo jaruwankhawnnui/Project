@@ -121,145 +121,99 @@ const Cart = () => {
   const handleBorrowItems = async () => {
     setIsLoading(true);
     console.log("Starting handleBorrowItems...");
+    
     const borrowedItems = items.filter((_, index) => checkedItems[index]);
     console.log("Borrowed items:", borrowedItems);
 
     if (borrowedItems.length === 0) {
-      alert("กรุณาเลือกอุปกรณ์ที่ต้องการยืม");
-      return;
+        alert("กรุณาเลือกอุปกรณ์ที่ต้องการยืม");
+        setIsLoading(false);
+        return;
     }
 
     try {
-      for (const item of borrowedItems) {
-        console.log("Processing item:", item);
+        for (const item of borrowedItems) {
+            console.log("Processing item:", item);
 
-        const imageUrl =
-          item.attributes?.image?.data?.length > 0
-            ? item.attributes.image.data[0].attributes.url.startsWith("http")
-              ? item.attributes.image.data[0].attributes.url
-              : `https://coe-hardware-lab-website-ievu.onrender.com${item.attributes.image.data[0].attributes.url}`
-            : null;
+            const imageUrl =
+                item.attributes?.image?.data?.length > 0
+                    ? item.attributes.image.data[0].attributes.url.startsWith("http")
+                        ? item.attributes.image.data[0].attributes.url
+                        : `https://coe-hardware-lab-website-ievu.onrender.com${item.attributes.image.data[0].attributes.url}`
+                    : null;
 
-        console.log("Final Image URL:", imageUrl);
+            console.log("Final Image URL:", imageUrl);
 
-        // ค้นหาอุปกรณ์ใน Strapi ที่มีชนิดเดียวกัน
-        const searchResponse = await fetch(
-          `https://coe-hardware-lab-website-ievu.onrender.com/api/equipment?filters[label][$eq]=${item.attributes?.label}&populate=image`
-        );
+            // 📌 ***ลบการตรวจสอบว่ามีอุปกรณ์อยู่แล้ว***
+            
+            // 🔸 ดึงรูปภาพ (ถ้ามี)
+            let uploadedImageId = null;
+            if (imageUrl) {
+                try {
+                    const imageBlob = await fetch(imageUrl).then((res) => res.blob());
+                    const formData = new FormData();
+                    formData.append("files", imageBlob, "image.jpg");
+                    console.log("Image prepared for upload.");
 
-        if (!searchResponse.ok) {
-          const searchErrorText = await searchResponse.text();
-          console.error("Error searching equipment:", searchErrorText);
-          alert("เกิดข้อผิดพลาดในการค้นหาอุปกรณ์");
-          return;
-        }
+                    const imageResponse = await fetch("https://coe-hardware-lab-website-ievu.onrender.com/api/upload", {
+                        method: "POST",
+                        body: formData,
+                    });
 
-        const searchData = await searchResponse.json();
-        console.log("Search result:", searchData);
+                    if (!imageResponse.ok) {
+                        console.error("Image upload error:", await imageResponse.text());
+                        alert("เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ");
+                        setIsLoading(false);
+                        return;
+                    }
 
-        const existingEquipment = searchData.data[0]; // หากพบอุปกรณ์ชนิดเดียวกัน
-        console.log("Existing equipment:", existingEquipment);
-
-        if (existingEquipment) {
-          // หากมีอุปกรณ์ชนิดเดียวกัน ให้เพิ่มจำนวน
-          const updatedAmount = existingEquipment.attributes.amount + item.quantity;
-          console.log("Updated amount:", updatedAmount);
-
-          const updateResponse = await fetch(
-            `https://coe-hardware-lab-website-ievu.onrender.com/api/equipment/${existingEquipment.id}`,
-            {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                data: {
-                  amount: updatedAmount,
-                },
-              }),
+                    const imageData = await imageResponse.json();
+                    uploadedImageId = imageData[0]?.id;
+                    console.log("Uploaded image ID:", uploadedImageId);
+                } catch (error) {
+                    console.error("Error fetching or preparing image:", error);
+                    alert("เกิดข้อผิดพลาดในการดึงหรือเตรียมรูปภาพ");
+                    setIsLoading(false);
+                    return;
+                }
             }
-          );
 
-          if (!updateResponse.ok) {
-            const updateErrorText = await updateResponse.text();
-            console.error("Error updating equipment:", updateErrorText);
-            alert("เกิดข้อผิดพลาดในการเพิ่มจำนวนอุปกรณ์");
-            return;
-          }
-
-          console.log("Successfully updated equipment:", existingEquipment.id);
-        } else {
-          // หากไม่มีอุปกรณ์ชนิดเดียวกัน ให้สร้างใหม่
-          const formData = new FormData();
-          if (imageUrl) {
-            try {
-              const imageBlob = await fetch(imageUrl).then((res) => res.blob());
-              formData.append("files", imageBlob, "image.jpg");
-              console.log("Image prepared for upload.");
-            } catch (error) {
-              console.error("Error fetching or preparing image:", error);
-              alert("เกิดข้อผิดพลาดในการดึงหรือเตรียมรูปภาพ");
-              return;
-            }
-          }
-
-          let uploadedImageId = null;
-          if (imageUrl) {
-            const imageResponse = await fetch("https://coe-hardware-lab-website-ievu.onrender.com/api/upload", {
-              method: "POST",
-              body: formData,
+            // 🔸 **สร้างอุปกรณ์ใหม่เสมอ (ไม่มีเงื่อนไขตรวจสอบว่ามีอยู่แล้ว)**
+            const createResponse = await fetch("https://coe-hardware-lab-website-ievu.onrender.com/api/equipment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    data: {
+                        name: session.user.name || "Unknown User",
+                        email: session.user.email,
+                        label: item.attributes?.label || "Unknown Item",
+                        amount: item.quantity,
+                        Price: item.attributes?.Price,
+                        totalPrice: item.attributes?.Price * item.quantity,
+                        image: uploadedImageId, // บันทึก ID ของรูปภาพ
+                    },
+                }),
             });
 
-            if (!imageResponse.ok) {
-              const imageErrorText = await imageResponse.text();
-              console.error("Image upload error:", imageErrorText);
-              alert(`เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ: ${imageErrorText}`);
-              return;
+            if (!createResponse.ok) {
+                console.error("Error creating equipment:", await createResponse.text());
+                alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+                setIsLoading(false);
+                return;
             }
 
-            const imageData = await imageResponse.json();
-            uploadedImageId = imageData[0]?.id;
-            console.log("Uploaded image ID:", uploadedImageId);
-          }
-
-          const createResponse = await fetch("https://coe-hardware-lab-website-ievu.onrender.com/api/equipment", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              data: {
-                name: session.user.name || "Unknown User",
-                email: session.user.email,
-                label: item.attributes?.label || "Unknown Item",
-                amount: item.quantity,
-                Price: item.attributes?.Price,
-                totalPrice: item.attributes?.Price * item.quantity,
-                image: uploadedImageId, // บันทึก ID ของรูปภาพ
-              },
-            }),
-          });
-
-          if (!createResponse.ok) {
-            const errorText = await createResponse.text();
-            console.error("Error creating equipment:", errorText);
-            alert(`เกิดข้อผิดพลาดในการบันทึกข้อมูล: ${errorText}`);
-            return;
-          }
-
-          console.log("Successfully created new equipment.");
+            console.log("Successfully created new equipment.", createResponse);
         }
-      }
 
-      alert("การยืมอุปกรณ์สำเร็จ");
-      router.push("/equipment");
+        alert("การยืมอุปกรณ์สำเร็จ");
+        router.push("/equipment");
     } catch (error) {
-      console.error("Error saving items:", error);
-      alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+        console.error("Error saving items:", error);
+        alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
-  };
+};
 
 
   return (
