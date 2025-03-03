@@ -37,7 +37,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-100 ">
       <Layout>
-        <div className="px-10">
+        <div className="px-10 mt-10 mx-auto px-4 sm:px-4 lg:px-4 pb-8">
           <div className="flex justify-center  items-center bg-[#465B7E] p-3  rounded-lg w-full">
             <h1 className="w-full text-white text-3xl   font-bold">
               ข่าวสารเว็บไซต์
@@ -46,7 +46,7 @@ export default function Home() {
           <main className="mt-7">
             <div className="bg-cyan-50 p-6 rounded-lg shadow-l">
 
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
 
                 {webnews.length > 0 ? (
                   webnews.map((newsItem) => (

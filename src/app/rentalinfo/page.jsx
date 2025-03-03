@@ -86,21 +86,21 @@ const RentalInfo = () => {
     "รายการเกินกำหนดคืน": 1,
     "รายการกำลังยืม": 2,
     "รายการคืนสำเร็จ": 3,
-    "รายการถูกปฏิเสธ": 4, 
+    "รายการถูกปฏิเสธ": 4,
     "รอดำเนินการ": 5,
   };
 
   const sortedRentalItems = [...rentalItems].sort((a, b) => {
     const statusA = getStatusText(a.status, a.dueDate);
     const statusB = getStatusText(b.status, b.dueDate);
-    
+
     return (statusOrder[statusA] || 99) - (statusOrder[statusB] || 99);
   });
-  
+
   return (
     <div className="bg-gray-100 min-h-screen">
       <Layout>
-        <div className="container mx-auto mt-10">
+        <div className="container mt-10 mx-auto px-4 sm:px-4 lg:px-4 pb-8">
 
           <div className="flex justify-center  items-center bg-[#465B7E] p-3 rounded-lg mb-6">
             <h1 className="w-full text-white text-3xl pl-10 font-bold">
@@ -108,9 +108,10 @@ const RentalInfo = () => {
             </h1>
           </div>
 
-          <div className="bg-cyan-50 shadow-lg rounded-lg p-6">
+          <div className="bg-cyan-50 shadow-lg rounded-lg p-6 overflow-x-auto">
 
-            <div className="grid grid-cols-7 text-white gap-4 py-3 px-4 font-bold border-b  mb-4 bg-[#5a7dbb] rounded-md">
+            <div className="grid grid-cols-7 text-white gap-4 py-3 px-4 font-bold border-b  
+            mb-4 bg-[#5a7dbb] rounded-md min-w-[900px]">
               <div className="text-center">รายการอุปกรณ์</div>
               <div className="text-center">ราคา/ชิ้น</div>
               <div className="text-center">จำนวน</div>
@@ -126,7 +127,7 @@ const RentalInfo = () => {
               sortedRentalItems.map((item, index) => (
                 <div
                   key={index}
-                  className={`grid grid-cols-7 gap-4 items-center py-2 px-4 mb-4 rounded-lg shadow ${getStatusClass(
+                  className={`grid grid-cols-7 gap-4  min-w-[900px] items-center py-2 px-4 mb-4 rounded-lg shadow ${getStatusClass(
                     item.status,
                     item.dueDate
                   )}`}

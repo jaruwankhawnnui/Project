@@ -104,15 +104,15 @@ const Card = ({ params }) => {
   return (
     <div className="bg-gray-100 flex flex-col min-h-screen">
       <Layout>
-        <div className="bg-cyan-50 rounded-lg p-10 mx-60 flex items-start shadow-lg">
-          <div className="w-80 h-80 bg-gray-300 border-2 border-gray-500 rounded-md overflow-hidden">
+        <div className="bg-cyan-50 rounded-lg p-10 mx-auto max-w-5xl flex flex-col md:flex-row items-start shadow-lg">
+          <div className="w-full md:w-80 h-80 bg-gray-300 border-2 border-gray-500 rounded-md overflow-hidden">
             <img
               src={selectedItem.attributes?.image?.data?.attributes?.url || "/default.jpg"}
               alt={selectedItem.attributes?.Label || "No image available"}
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="ml-6 flex-1">
+          <div className="ml-0 md:ml-6 flex-1 mt-6 md:mt-0">
             <h2 className="text-2xl font-bold">
               {selectedItem.attributes?.Label || "Unknown Item"}
             </h2>
@@ -165,7 +165,7 @@ const Card = ({ params }) => {
           </div>
 
         </div>
-        <div className="bg-cyan-50 rounded-lg p-10 mx-60 mt-6 shadow-lg">
+        <div className="bg-cyan-50 rounded-lg p-10 mx-auto max-w-5xl mt-6 shadow-lg">
           <h2 className="text-xl font-bold mb-2">รายละเอียดเพิ่มเติม</h2>
           <p className="text-gray-700">
             {selectedItem.attributes?.Detail || "ไม่มีรายละเอียดเพิ่มเติม"}

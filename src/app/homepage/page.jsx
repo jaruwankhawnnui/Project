@@ -63,7 +63,7 @@ const Home = () => {
     return filteredItems.map((item, index) => (
       <motion.div
         key={index}
-        className="relative bg-gradient-to-br from-[#6EC7E2] to-cyan-50 shadow-xl rounded-lg p-4 w-48 mx-5 h-62 mt-10 mr-6 cursor-pointer flex flex-col items-center"
+        className="relative bg-gradient-to-br from-[#6EC7E2] to-cyan-50 shadow-lg rounded-lg p-4 w-full sm:w-60 md:w-48 lg:w-52 xl:w-60 mx-3 h-62 mt-6 cursor-pointer flex flex-col items-center"
         onClick={() => handleCardClick(item)}
         whileHover={{ scale: 1.05 }} // ✅ เอฟเฟกต์ขยายเมื่อ Hover
         whileTap={{ scale: 0.95 }} // ✅ เอฟเฟกต์ย่อเมื่อคลิก
@@ -92,7 +92,7 @@ const Home = () => {
 
       {/* ✅ พื้นหลังไล่สี พร้อมข้อความต้อนรับ */}
       <motion.div
-        className="bg-gradient-to-br from-[#6EC7E2] to-cyan-50 shadow-xl rounded-2xl p-6 px-32 mx-auto text-gray-700 flex items-center justify-center mt-6"
+        className="bg-gradient-to-br from-[#6EC7E2] to-cyan-50 shadow-xl rounded-2xl p-6 px-8 sm:px-16 md:px-24 lg:px-32 mx-auto text-gray-700 flex flex-col sm:flex-row items-center justify-center mt-6 text-center sm:text-left"
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
@@ -142,7 +142,7 @@ const Home = () => {
           placeholder="🔍 ค้นหาอุปกรณ์"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-1/3 px-4 mt-4 py-2 border rounded-2xl shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full sm:w-2/3 md:w-1/2 px-4 mt-4 py-2 border rounded-2xl shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </motion.div>
 

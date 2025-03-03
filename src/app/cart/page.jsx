@@ -32,7 +32,7 @@ const Cart = () => {
       setLoading(true);
       try {
         const response = await fetch(
-          `https://coe-hardware-lab-website-ievu.onrender.com/api/adds?filters[email][$eq]=${session.user.email}&populate=image`
+          `http://172.21.32.1:1337/api/adds?filters[email][$eq]=${session.user.email}&populate=image`
         );
 
 
@@ -98,7 +98,7 @@ const Cart = () => {
 
   const deleteItem = async (id, index) => {
     try {
-      const response = await fetch(`https://coe-hardware-lab-website-ievu.onrender.com/api/adds/${id}`, {
+      const response = await fetch(`http://172.21.32.1:1337/api/adds/${id}`, {
         method: "DELETE",
       });
 
@@ -137,14 +137,14 @@ const Cart = () => {
           item.attributes?.image?.data?.length > 0
             ? item.attributes.image.data[0].attributes.url.startsWith("http")
               ? item.attributes.image.data[0].attributes.url
-              : `https://coe-hardware-lab-website-ievu.onrender.com/${item.attributes.image.data[0].attributes.url}`
+              : `http://172.21.32.1:1337${item.attributes.image.data[0].attributes.url}`
             : null;
 
         console.log("Final Image URL:", imageUrl);
 
         // ค้นหาอุปกรณ์ใน Strapi ที่มีชนิดเดียวกัน
         const searchResponse = await fetch(
-          `https://coe-hardware-lab-website-ievu.onrender.com/api/equipment?filters[label][$eq]=${item.attributes?.label}&populate=image`
+          `http://172.21.32.1:1337/api/equipment?filters[label][$eq]=${item.attributes?.label}&populate=image`
         );
 
         if (!searchResponse.ok) {
@@ -166,7 +166,7 @@ const Cart = () => {
           console.log("Updated amount:", updatedAmount);
 
           const updateResponse = await fetch(
-            `https://coe-hardware-lab-website-ievu.onrender.com/api/equipment/${existingEquipment.id}`,
+            `http://172.21.32.1:1337/api/equipment/${existingEquipment.id}`,
             {
               method: "PUT",
               headers: {
@@ -205,7 +205,7 @@ const Cart = () => {
 
           let uploadedImageId = null;
           if (imageUrl) {
-            const imageResponse = await fetch("https://coe-hardware-lab-website-ievu.onrender.com/api/upload", {
+            const imageResponse = await fetch("http://172.21.32.1:1337/api/upload", {
               method: "POST",
               body: formData,
             });
@@ -222,7 +222,7 @@ const Cart = () => {
             console.log("Uploaded image ID:", uploadedImageId);
           }
 
-          const createResponse = await fetch("https://coe-hardware-lab-website-ievu.onrender.com/api/equipment", {
+          const createResponse = await fetch("http://172.21.32.1:1337/api/equipment", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -265,7 +265,7 @@ const Cart = () => {
   return (
     <div className="bg-gray-100 min-h-screen">
       <Layout>
-        <div className="container mx-auto">
+        <div className="container mx-auto px-4 sm:px-4 lg:px-4 pb-8">
           <h1 className="text-4xl font-bold my-6">รถเข็นของฉัน</h1>
           {loading ? (
             <div className="text-center py-10">กำลังโหลดข้อมูล...</div>
@@ -273,100 +273,114 @@ const Cart = () => {
             <div className="text-center py-10">ไม่มีอุปกรณ์ในประวัติการยืม</div>
           ) : (
             <div>
-              <div className="shadow-lg bg-cyan-50 p-4 rounded-lg">
-                {items.map((item, index) => {
-                  const totalPrice = item.attributes?.Price * item.quantity;
-                  const imageUrl = item.attributes?.image.data[0].attributes.url;
+              <div className="">
+                <div className="shadow-lg bg-cyan-50 p-4 rounded-lg overflow-x-auto">
+                  {items.map((item, index) => {
+                    const totalPrice = item.attributes?.Price * item.quantity;
+                    const imageUrl = item.attributes?.image.data[0].attributes.url;
 
-                  return (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between py-4 border-b border-gray-200"
-                    >
-                      <div onClick={() => handleCheckboxChange(index)} className="cursor-pointer">
-                        {checkedItems[index] ? (
-                          <RiCheckboxLine className="w-6 h-6 text-green-500" />
-                        ) : (
-                          <RiCheckboxBlankLine className="w-6 h-6" />
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1 flex-1">
-                        <img
-                          src={imageUrl}
-                          // alt={item.attributes?.image.data[0].attributes.url || "Unknown Item"}
-                          // item.attributes.image?.data?.attributes?.url
-                          className="w-16 mx-6 h-16 object-cover rounded-lg"
-                        />
+                    return (
+                      <div
+                        key={index}
+                        className="grid grid-cols-[auto,auto,0.5fr,auto,auto,auto,auto] items-center 
+                        gap-4 py-2 px-4 rounded-lg shadow-lg bg-white  min-w-[900px] "
+                      >
+                        <div onClick={() => handleCheckboxChange(index)} className="cursor-pointer w-fit">
+                          {checkedItems[index] ? (
+                            <RiCheckboxLine className="w-6 h-6 text-green-500" />
+                          ) : (
+                            <RiCheckboxBlankLine className="w-6 h-6" />
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                          <img
+                            src={imageUrl}
+                            // alt={item.attributes?.image.data[0].attributes.url || "Unknown Item"}
+                            // item.attributes.image?.data?.attributes?.url
+                            className="w-16 mx-6 h-16 object-cover rounded-lg"
+                          />
+                        </div>
+
                         <div>
-                          <h2 className="text-lg font-bold px-6 text-gray-800">
+                          <h2 className="text-sm sm:text-base font-bold text-gray-800">
                             {item.attributes?.label || "Unknown Item"}
                           </h2>
+                        </div>
+
+                        <div>
                           <p className="text-sm px-6 text-gray-500">{item.attributes?.Price || 0} ฿</p>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-1 px-6">
-                        <button
-                          className="bg-gray-300 hover:bg-gray-400 px-1  rounded-l"
-                          onClick={() => decreaseQuantity(index)}
-                        >
-                          <FontAwesomeIcon icon={faMinus} className="w-3 h-3" />
-                        </button>
-                        <span className="px-4">{item.quantity}</span>
-                        <button
-                          className="bg-gray-300 hover:bg-gray-400 px-1  rounded-r"
-                          onClick={() => increaseQuantity(index)}
-                        >
-                          <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
-                        </button>
-                      </div>
-                      <div className="text-gray-800 font-bold text-md px-8">{totalPrice} ฿</div>
 
-                      <button onClick={() => deleteItem(item.id, index)}
-                        className="bg-red-500 text-white flex items-center justify-center px-1 py-1 rounded-lg mx-auto">
-                        <IoClose
-                          className="text-white cursor-pointer w-5 h-5"
-                        />
-                      </button>
+                        <div className="flex items-center gap-1 px-6">
+                          <button
+                            className="bg-gray-300 hover:bg-gray-400 px-1  rounded-l"
+                            onClick={() => decreaseQuantity(index)}
+                          >
+                            <FontAwesomeIcon icon={faMinus} className="w-3 h-3" />
+                          </button>
+                          <span className="px-4">{item.quantity}</span>
+                          <button
+                            className="bg-gray-300 hover:bg-gray-400 px-1  rounded-r"
+                            onClick={() => increaseQuantity(index)}
+                          >
+                            <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
+                          </button>
+                        </div>
 
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="flex justify-between items-center bg-[#4691D3] text-white p-4 rounded-lg mt-4 shadow-lg">
-                <div onClick={handleSelectAllChange} className="flex items-center cursor-pointer">
-                  {isSelectAllChecked ? (
-                    <RiCheckboxLine className="w-6 h-6 text-green-500" />
-                  ) : (
-                    <RiCheckboxBlankLine className="w-6 h-6" />
-                  )}
-                  <span className="ml-2 text-white font-medium">เลือกทั้งหมด</span>
+
+                        <div className="text-gray-800 font-bold text-md px-8">{totalPrice} ฿</div>
+                        <button onClick={() => deleteItem(item.id, index)}
+                          className="bg-red-500 text-white flex items-center justify-center px-1 py-1 rounded-lg mx-auto">
+                          <IoClose
+                            className="text-white cursor-pointer w-5 h-5"
+                          />
+                        </button>
+
+                      </div>
+                    );
+                  })}
                 </div>
-                <div className="flex items-center gap-6">
-                  <span className="text-white font-medium">รวม: {checkedCount} ชิ้น</span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row justify-between items-center bg-[#4691D3]
+               text-white p-4 rounded-lg mt-4 shadow-lg ">
+                <div className="flex justify-between w-full sm:w-auto items-center mb-3 sm:mb-0">
+                  <div onClick={handleSelectAllChange} className="flex items-center cursor-pointer">
+                    {isSelectAllChecked ? (
+                      <RiCheckboxLine className="w-6 h-6 text-green-500" />
+                    ) : (
+                      <RiCheckboxBlankLine className="w-6 h-6" />
+                    )}
+                    <span className="ml-2 text-white font-medium">เลือกทั้งหมด</span>
+                  </div>
+                  <span className="text-white font-medium ml-6">รวม: {checkedCount} ชิ้น</span>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-center sm:text-left w-full sm:w-auto">
                   <span className="text-white font-bold">ราคารวมทั้งหมด: {totalCheckedPrice} ฿</span>
+
                   <button
-                    className="bg-green-500  hover:bg-green-600 text-white px-4 py-2 rounded-lg"
+                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg w-full sm:w-auto"
                     onClick={handleBorrowItems}
                   >
                     ยืมอุปกรณ์
                   </button>
-                  {/* ✅ แสดง Loading Overlay พร้อมไอคอนหมุน */}
-                  {isLoading && (
-                    <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-70 z-50">
-                      <motion.div
-                        className="flex flex-col items-center"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        <AiOutlineLoading3Quarters className="text-5xl text-blue-500 animate-spin" /> {/* ✅ ไอคอนหมุน */}
-                        <p className="text-xl font-bold text-blue-500 mt-3">กำลังโหลด...</p>
-                      </motion.div>
-                    </div>
-                  )}
-
                 </div>
 
+                {isLoading && (
+                  <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-70 z-50">
+                    <motion.div
+                      className="flex flex-col items-center"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <AiOutlineLoading3Quarters className="text-5xl text-blue-500 animate-spin" />
+                      <p className="text-xl font-bold text-blue-500 mt-3">กำลังโหลด...</p>
+                    </motion.div>
+                  </div>
+                )}
               </div>
             </div>
 
