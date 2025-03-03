@@ -62,7 +62,7 @@ const MainHeader = ({ session }) => {
 
   return (
     <div className='bg-gradient-to-br from-cyan-100 to-[#6EC7E2] flex justify-between items-center px-4 sm:px-6 p-4 mb-4 relative'>
-      
+
       {/* Logo */}
       <div className="flex items-center">
         <Image src="/logo/hw_web_logo.svg" width={180} height={40} alt="hw_web_logo" priority className="w-32 sm:w-44 md:w-56" />
@@ -70,46 +70,48 @@ const MainHeader = ({ session }) => {
 
       {/* ไอคอนเมนู + Badge แจ้งเตือน */}
       <div className="flex items-center space-x-2 sm:space-x-4">
-  {/* ไอคอน Chat */}
-  <BsChatDotsFill
-    className="cursor-pointer h-5 w-5 sm:h-6 sm:w-6 text-gray-500"
-    onClick={() => window.open("https://line.me/ti/g2/7AziMh5yNWFA4IFRKflrd5g5vYJTAp2hFJXBaw?utm_source=invitation&utm_medium=link_copy&utm_campaign=default", "_blank")}
-  />
+        {/* ไอคอน Chat */}
+        <BsChatDotsFill
+          className="cursor-pointer h-5 w-5 sm:h-6 sm:w-6 text-gray-500"
+          onClick={() => window.open("https://line.me/ti/g2/7AziMh5yNWFA4IFRKflrd5g5vYJTAp2hFJXBaw?utm_source=invitation&utm_medium=link_copy&utm_campaign=default", "_blank")}
+        />
 
-  {/* ไอคอน Globe */}
-  <SlGlobe className="cursor-pointer h-5 w-5 sm:h-6 sm:w-6 text-gray-500" />
+        {/* ไอคอน Globe */}
+        <Link href="/webnew">
+          <SlGlobe className="cursor-pointer h-5 w-5 sm:h-6 sm:w-6 text-gray-500" />
+        </Link>
 
-  {/* ไอคอนแจ้งเตือน */}
-  <div className="relative">
-    <FaBell className="cursor-pointer h-5 w-5 sm:h-6 sm:w-6 text-gray-500" onClick={toggleDropdown} />
-    {notificationCount > 0 && (
-      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5">
-        {notificationCount}
-      </span>
-    )}
-  </div>
+        {/* ไอคอนแจ้งเตือน */}
+        <div className="relative">
+          <FaBell className="cursor-pointer h-5 w-5 sm:h-6 sm:w-6 text-gray-500" onClick={toggleDropdown} />
+          {notificationCount > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5">
+              {notificationCount}
+            </span>
+          )}
+        </div>
 
-  {/* เมนู Hamburger (เฉพาะจอเล็ก) */}
-  <FaBars className="cursor-pointer h-5 w-5 sm:h-6 sm:w-6 text-gray-500" onClick={toggleMenu} />
+        {/* เมนู Hamburger (เฉพาะจอเล็ก) */}
+        <FaBars className="cursor-pointer h-5 w-5 sm:h-6 sm:w-6 text-gray-500" onClick={toggleMenu} />
 
-  {/* ปุ่มออกจากระบบ - อยู่ในกลุ่มเดียวกัน */}
-  {session ? (
-    <Image
-      src={session.user.image}
-      alt={session.user.name}
-      width={40}
-      height={40}
-      className="rounded-full cursor-pointer w-8 h-8 sm:w-10 sm:h-10"
-      onClick={toggleMenu}
-    />
-  ) : (
-    <Link href="/">
-      <button className="bg-red-500 text-white flex items-center px-3 py-1.5 rounded-lg text-sm sm:text-base">
-        <FaSignOutAlt className="mr-1" /> ออกจากระบบ
-      </button>
-    </Link>
-  )}
-</div>
+        {/* ปุ่มออกจากระบบ - อยู่ในกลุ่มเดียวกัน */}
+        {session ? (
+          <Image
+            src={session.user.image}
+            alt={session.user.name}
+            width={40}
+            height={40}
+            className="rounded-full cursor-pointer w-8 h-8 sm:w-10 sm:h-10"
+            onClick={toggleMenu}
+          />
+        ) : (
+          <Link href="/">
+            <button className="bg-red-500 text-white flex items-center px-3 py-1.5 rounded-lg text-sm sm:text-base">
+              <FaSignOutAlt className="mr-1" /> ออกจากระบบ
+            </button>
+          </Link>
+        )}
+      </div>
 
 
       {/* เมนู Sidebar */}
@@ -117,7 +119,7 @@ const MainHeader = ({ session }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={toggleMenu}></div>
       )}
       <div className={`fixed right-0 top-0 h-full bg-white w-64 shadow-lg z-50 transform ${menuVisible ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out`}>
-      <ul className="p-4">
+        <ul className="p-4">
           <Link href="/homepage" className="block">
             <li className="flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4 cursor-pointer">
               <FaHome className="mr-2" />
@@ -168,13 +170,15 @@ const MainHeader = ({ session }) => {
           </Link>
 
           {/* Logout Button */}
-          <li
-            className="flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4 cursor-pointer"
-            onClick={Logout}
-          >
-            <FaSignOutAlt className="mr-2" />
-            ออกจากระบบ
-          </li>
+          <Link href="/" className="block">
+            <li
+              className="flex justify-start items-center hover:bg-blue-200 hover:text-blue-800 rounded-xl p-4 cursor-pointer"
+            // onClick={Logout}
+            >
+              <FaSignOutAlt className="mr-2" />
+              ออกจากระบบ
+            </li>
+          </Link>
         </ul>
       </div>
     </div>
