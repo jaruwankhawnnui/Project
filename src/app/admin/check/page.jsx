@@ -172,7 +172,7 @@ export default function ApprovalPage() {
           <div className="mb-4 flex justify-end">
             <input
               type="text"
-              placeholder="ค้นหาอุปกรณ์"
+              placeholder="ค้นหารายชื่อ"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="px-4 py-2 border rounded shadow-sm focus:outline-none focus:shadow-outline text-sm 
