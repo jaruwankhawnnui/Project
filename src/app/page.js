@@ -13,7 +13,9 @@ export default async function Home() {
   const webnews = data.data;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-cyan-300 text-white">
+    <div className="min-h-screen bg-cover bg-center"
+         style={{ backgroundImage: "url('/coee.jpg')" }} // ✅ ใช้ path รูปภาพตรงๆ
+>
       {/* Header Section */}
       <header className="bg-gradient-to-br from-cyan-100 to-[#6EC7E2] p-4 flex flex-wrap justify-between items-center">
         <div className="flex items-center p-2 mx-4">
@@ -38,9 +40,9 @@ export default async function Home() {
 
       {/* Content Section */}
       <main className="p-4 md:p-8 container mx-auto">
-        <section className="bg-gray-200 p-6 rounded-lg shadow-lg text-black">
+        <section className="bg-white bg-opacity-40 backdrop-blur-sm p-6 rounded-lg shadow-lg text-black">
           <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-center">
-            ข่าวสารเว็บไซต์ !
+            ข่าวสารเว็บไซต์ 
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {webnews.map((news) => (
@@ -65,10 +67,9 @@ export default async function Home() {
 
       {/* Footer Section */}
       <footer className="bg-blue-900 p-8 text-center text-sm sm:text-base">
-        <p>สาขาวิชาวิศวกรรมคอมพิวเตอร์, คณะวิศวกรรมศาสตร์, มหาวิทยาลัยสงขลานครินทร์</p>
-        <p>Email: jaruwankhawnnui@gmail.com</p>
-        <p>Website: <a href="https://www.coe.psu.ac.th/" className="underline">coe.psu.ac.th</a></p>
-        <p>โทร: +66 (0)74 287358</p>
+        <p>ภาควิชาสาขาวิศวกรรมคอมพิวเตอร์</p>
+        <p>คณะวิศวกรรมศาสตร์  มหาวิทยาลัยสงขลานครินทร์ อำเภอหาดใหญ่ จังหวัดสงขลา 90112</p>
+       
       </footer>
     </div>
   );
