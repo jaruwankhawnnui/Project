@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaUserCircle } from "react-icons/fa";
+import { signOut } from "next-auth/react";
 
 
 export default function Navbar({ children }) {
@@ -90,7 +91,7 @@ export default function Navbar({ children }) {
           {/* Right Side - Admin Role */}
           <div
             className="flex items-center text-white space-x-2 ml-12 border border-red-400 rounded-md px-4 py-2 shadow-md bg-red-500 cursor-pointer"
-            // onClick={() => signOut({ callbackUrl: "/auth/login" })} // ✅ Redirect ไปหน้า Login
+            onClick={() => signOut({ callbackUrl: "/auth/login" })} // ✅ Redirect ไปหน้า Login
           >
             <FaUserCircle className="text-4xl" />
             <span className="text-l font-bold">Logout ADMIN</span>
