@@ -67,7 +67,6 @@ const CommentPage = () => {
         <div className="max-w-2xl mx-auto p-6 bg-white bg-opacity-80 rounded-lg">
           <h1 className="text-2xl font-bold mb-4">แสดงความคิดเห็น</h1>
 
-          {/* ฟอร์มแสดงความคิดเห็น */}
           <form onSubmit={handleCommentSubmit} className="mb-4">
             <input
               type="text"

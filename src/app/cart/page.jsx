@@ -144,9 +144,7 @@ const Cart = () => {
 
             console.log("Final Image URL:", imageUrl);
 
-            // 📌 ***ลบการตรวจสอบว่ามีอุปกรณ์อยู่แล้ว***
             
-            // 🔸 ดึงรูปภาพ (ถ้ามี)
             let uploadedImageId = null;
             if (imageUrl) {
                 try {
@@ -178,7 +176,7 @@ const Cart = () => {
                 }
             }
 
-            // 🔸 **สร้างอุปกรณ์ใหม่เสมอ (ไม่มีเงื่อนไขตรวจสอบว่ามีอยู่แล้ว)**
+          
             const createResponse = await fetch("https://coe-hardware-lab-website-ievu.onrender.com/api/equipment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

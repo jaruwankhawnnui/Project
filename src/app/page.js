@@ -37,10 +37,14 @@ export default async function Home() {
           </Link>
         </div>
       </header>
+   
 
       {/* Content Section */}
       <main className="p-4 md:p-8 container mx-auto">
         <section className="bg-white bg-opacity-40 backdrop-blur-sm p-6 rounded-lg shadow-lg text-black">
+        <div className="text-xl sm:text-xl text-white font-bold text-center  py-2 px-2  bg-opacity-60  animate-pulse">
+  กรุณาล็อกอินก่อนเข้าใช้งาน....
+</div>
           <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-center">
             ข่าวสารเว็บไซต์ 
           </h2>
@@ -67,8 +71,8 @@ export default async function Home() {
 
       {/* Footer Section */}
       <footer className="bg-blue-900 p-8 text-center text-sm sm:text-base">
-        <p>ภาควิชาสาขาวิศวกรรมคอมพิวเตอร์</p>
-        <p>คณะวิศวกรรมศาสตร์  มหาวิทยาลัยสงขลานครินทร์ อำเภอหาดใหญ่ จังหวัดสงขลา 90112</p>
+        <p>สาขาวิชาวิศวกรรมคอมพิวเตอร์</p>
+        <p>คณะวิศวกรรมศาสตร์  มหาวิทยาลัยสงขลานครินทร์ อำเภอหาดใหญ่ จังหวัดสงขลา 90110</p>
        
       </footer>
     </div>
